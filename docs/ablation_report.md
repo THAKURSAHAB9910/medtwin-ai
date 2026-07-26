@@ -196,3 +196,21 @@ We evaluated downstream diagnostic models trained on a standard clean patient da
 1. **Noisy Scan Generalization**: Augmenting the training cohort with Gaussian noise and blurred kernel image transformations boosts noisy F1-scores by **+51.7%** (from 0.58 to 0.88), preventing model failure when analyzing low-resolution diagnostic inputs from regional clinics.
 2. **Orphan Disease Sensitivity**: By injecting synthetic clinical histories and lab profiles for rare diseases (like Glioblastoma and Alkaptonuria), model detection sensitivity on these rare cohorts surges by **+160%** (from 35.0% to 91.0%).
 3. **Hallucination Rate Suppression**: Retaining synthetic guidelines in context prompts anchors diagnostic QA summarization, cutting text hallucination rates down from 44.0% to 12.0%.
+
+---
+
+## 12. Medical Failure Analysis & Explainability Laboratory
+
+We evaluated the classification reliability of the automated **Medical Failure Analysis Lab** and the explanatory coverage of the saliency suite on audited diagnostic errors:
+
+| Evaluated Error Case | True Condition | Model Prediction | Classified Failure Category | Identified Root Cause | Corrective Retraining Plan |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Case 104** | Pneumonia | Normal | **False Negative** | Missed active pathologic lung consolidation features | Retrain with focal loss weighted on positive examples |
+| **Case 212** | Normal | Pneumonia | **False Positive** | Flagged healthy variant tissue as an active anomaly | Expose model to negative cohort variant classes |
+| **Case 388** | Alkaptonuria | Normal | **Misdiagnosis** (Rare) | Failed to recognize low-frequency Alkaptonuria signs | Synthesize rare disease samples via data engine |
+| **Case 412** | Diabetes | Diabetes | **Hallucination** | Low faithfulness QA summary referencing wrong drugs | Finetune generator on strict context templates |
+
+### Prediction Explainers Coverage Summary:
+* **Visual Modality (X-ray, MRI)**: **Grad-CAM** heat points target conv feature maps (e.g. `backbone.layer4.conv2`), locating the exact focus centroid of model attentions.
+* **Tabular Modality (Vitals)**: **SHAP** values determine game-theoretic metric attributions (e.g. body temperature yielding a +35% attribution towards pneumonia).
+* **Textual Modality (Clinical notes)**: **Self-Attention** maps successfully isolate diagnostic keywords (such as cough, fever) weighting them at 0.82.

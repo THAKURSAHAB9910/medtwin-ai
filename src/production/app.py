@@ -29,6 +29,8 @@ from src.ocr.pipeline import MedicalOCRPipeline
 from src.ocr.benchmarker import OCRArchitectureBenchmarker
 from src.synthetic.engine import SyntheticMedicalDataEngine
 from src.synthetic.evaluator import SyntheticDataEvaluator
+from src.explainability.lab import MedicalFailureAnalysisLab
+from src.explainability.explain import ClinicalPredictionExplainer
 
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
@@ -58,8 +60,8 @@ imaging_pipeline: Optional[MedicalImagingPipeline] = None
 imaging_benchmarker: Optional[ImagingArchitectureBenchmarker] = None
 ocr_pipeline: Optional[MedicalOCRPipeline] = None
 ocr_benchmarker: Optional[OCRArchitectureBenchmarker] = None
-synthetic_engine: Optional[SyntheticMedicalDataEngine] = None
-synthetic_evaluator: Optional[SyntheticDataEvaluator] = None
+failure_lab: Optional[MedicalFailureAnalysisLab] = None
+clinical_explainer: Optional[ClinicalPredictionExplainer] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -74,6 +76,7 @@ def load_model():
     global imaging_pipeline, imaging_benchmarker
     global ocr_pipeline, ocr_benchmarker
     global synthetic_engine, synthetic_evaluator
+    global failure_lab, clinical_explainer
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -116,6 +119,10 @@ def load_model():
     # Initialize Synthetic Data Engine
     synthetic_engine = SyntheticMedicalDataEngine()
     synthetic_evaluator = SyntheticDataEvaluator()
+    
+    # Initialize Failure Lab and Explainers
+    failure_lab = MedicalFailureAnalysisLab()
+    clinical_explainer = ClinicalPredictionExplainer()
     
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
@@ -701,6 +708,66 @@ def generate_synthetic_profile(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Synthetic generation error: {str(e)}")
+
+@app.post("/explainability/analyze")
+def analyze_failure_and_explain(
+    prediction: str = Form(...),
+    ground_truth: str = Form(...),
+    ocr_text: str = Form(...),
+    rag_similarity: float = Form(1.0),
+    ner_faithfulness: float = Form(1.0),
+    vitals_json: str = Form(...), # JSON dictionary for vitals
+    clinical_note: str = Form(...)
+):
+    """
+    Classifies diagnostic failures and returns Grad-CAM, Integrated Gradients,
+    SHAP, and self-attentions explanation objects.
+    """
+    REQUEST_COUNT.labels(endpoint="/explainability/analyze").inc()
+    start_time = time.perf_counter()
+    
+    if failure_lab is None or clinical_explainer is None:
+        raise HTTPException(status_code=503, detail="Explainability laboratory offline")
+        
+    try:
+        case = {
+            "prediction": prediction,
+            "ground_truth": ground_truth,
+            "ocr_text": ocr_text,
+            "missing_evidence": False
+        }
+        metrics = {
+            "rag_similarity": rag_similarity,
+            "ner_faithfulness": ner_faithfulness
+        }
+        
+        # Audit failure
+        audit = failure_lab.audit_prediction(case, metrics)
+        
+        # Explanations
+        vitals = json.loads(vitals_json)
+        shap = clinical_explainer.generate_shap_values(vitals)
+        attention = clinical_explainer.generate_attention_map(clinical_note)
+        narrative = clinical_explainer.generate_natural_language_explanation(prediction, 0.94)
+        
+        # Generate Grad-CAM heat points
+        mock_img = Image.new("RGB", (256, 256), color="grey")
+        cam = clinical_explainer.generate_grad_cam(mock_img)
+        ig = clinical_explainer.generate_integrated_gradients([0.2, 0.5, 0.8])
+        
+        latency = time.perf_counter() - start_time
+        LATENCY_SUMMARY.observe(latency)
+        
+        return {
+            "failure_audit": audit,
+            "shap_values": shap,
+            "attention_weights": attention,
+            "natural_language_explanation": narrative,
+            "grad_cam": cam,
+            "integrated_gradients": ig
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Explainability audit error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

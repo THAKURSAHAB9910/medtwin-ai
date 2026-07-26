@@ -335,6 +335,35 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: Synthetic API returned status code {response_synth.status_code}")
             print(response_synth.text)
             
+        # --- Explainability & Failure Analysis API Call ---
+        explain_url = "http://127.0.0.1:8000/explainability/analyze"
+        explain_payload = {
+            "prediction": "Normal",
+            "ground_truth": "Pneumonia",
+            "ocr_text": "Rx: Ceftriaxone 1g IV daily.",
+            "rag_similarity": 0.85,
+            "ner_faithfulness": 0.95,
+            "vitals_json": json.dumps({"temperature": 101.5, "wbc_count": 14500, "oxygen_saturation": 92.0}),
+            "clinical_note": "Patient presents with cough and fever."
+        }
+        print(f"\nSubmitting diagnostic failure and query parameters to {explain_url}...")
+        response_exp = requests.post(explain_url, data=explain_payload)
+        if response_exp.status_code == 200:
+            res_exp_json = response_exp.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI EXPLAINABILITY & FAILURE ANALYSIS ")
+            print("="*65)
+            print(f" Failure Detected: {res_exp_json['failure_audit']['failure_detected']}")
+            print(f" Failure Class:    {res_exp_json['failure_audit']['failure_class']}")
+            print(f" Root Cause:       \"{res_exp_json['failure_audit']['root_cause_analysis']}\"")
+            print(f" Retraining Plan:  \"{res_exp_json['failure_audit']['suggested_retraining_action']}\"")
+            print(f" SHAP Attributions: {res_exp_json['shap_values']}")
+            print(f" Grad-CAM Layer:   {res_exp_json['grad_cam']['target_layer']}")
+            print("="*65)
+        else:
+            print(f"Error: Explainability API returned status code {response_exp.status_code}")
+            print(response_exp.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")

@@ -160,3 +160,16 @@ To simulate clinical scan imperfections, MedTwin AI implements mathematical mode
 2. **Gaussian Noise Injection**: Adds random perturbations drawn from a normal distribution to simulate sensor electronic noise:
    $$I_{\text{noisy}}(x, y) = \text{clip}(I(x, y) + \mathcal{N}(0, \sigma^2), 0, 255)$$
 3. **Orphan Condition Profiling**: Synthesizes structured data logs mapping specific low-frequency disease symptoms (such as Homogentisic Acid dark pigmentation in Alkaptonuria) to enhance classifier training samples.
+
+---
+
+## 13. Saliency Attribution & Feature Explainability
+
+To justify decisions to medical board auditors, MedTwin AI implements three formal attribution frameworks:
+1. **Shapley Additive Explanations (SHAP)**: Allocates metric contributions to vital variables $x_i$ using cooperative game theory:
+   $$\phi_i(v) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} [v(S \cup \{i\}) - v(S)]$$
+   where $F$ is the complete set of patient vital metrics (vitals, symptoms) and $v(S)$ is the predictive confidence using subset $S$.
+2. **Integrated Gradients (IG)**: Evaluates path integrals of gradients along a straight line from baseline image $x'$ to target patient scan $x$:
+   $$\text{IG}_j(x) = (x_j - x'_j) \int_{0}^{1} \frac{\partial F(x' + \alpha(x - x'))}{\partial x_j} d\alpha$$
+3. **Grad-CAM**: Computes localized coarse visual heatmaps of class importance by taking target gradients of score $y^c$ with respect to layer feature maps $A^k$:
+   $$L^c_{\text{Grad-CAM}} = \text{ReLU}\left( \sum_k \alpha_k^c A^k \right), \quad \text{where } \alpha_k^c = \frac{1}{Z} \sum_{i} \sum_{j} \frac{\partial y^c}{\partial A^k_{i, j}}$$
