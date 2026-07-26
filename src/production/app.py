@@ -31,6 +31,7 @@ from src.synthetic.engine import SyntheticMedicalDataEngine
 from src.synthetic.evaluator import SyntheticDataEvaluator
 from src.explainability.lab import MedicalFailureAnalysisLab
 from src.explainability.explain import ClinicalPredictionExplainer
+from src.tracking.tracker import ClinicalExperimentTracker
 
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
@@ -62,6 +63,9 @@ ocr_pipeline: Optional[MedicalOCRPipeline] = None
 ocr_benchmarker: Optional[OCRArchitectureBenchmarker] = None
 failure_lab: Optional[MedicalFailureAnalysisLab] = None
 clinical_explainer: Optional[ClinicalPredictionExplainer] = None
+synthetic_engine: Optional[SyntheticMedicalDataEngine] = None
+synthetic_evaluator: Optional[SyntheticDataEvaluator] = None
+experiment_tracker: Optional[ClinicalExperimentTracker] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -77,6 +81,7 @@ def load_model():
     global ocr_pipeline, ocr_benchmarker
     global synthetic_engine, synthetic_evaluator
     global failure_lab, clinical_explainer
+    global experiment_tracker
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -123,6 +128,9 @@ def load_model():
     # Initialize Failure Lab and Explainers
     failure_lab = MedicalFailureAnalysisLab()
     clinical_explainer = ClinicalPredictionExplainer()
+    
+    # Initialize Experiment Tracker
+    experiment_tracker = ClinicalExperimentTracker()
     
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
@@ -768,6 +776,43 @@ def analyze_failure_and_explain(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Explainability audit error: {str(e)}")
+
+@app.post("/tracking/log")
+def log_experiment_run(
+    run_name: str = Form(...),
+    params_json: str = Form(...),
+    metrics_json: str = Form(...)
+):
+    """
+    Logs hyperparameter configurations and final metrics to MLflow, W&B, and TensorBoard.
+    """
+    REQUEST_COUNT.labels(endpoint="/tracking/log").inc()
+    start_time = time.perf_counter()
+    
+    if experiment_tracker is None:
+        raise HTTPException(status_code=503, detail="Experiment tracker offline")
+        
+    try:
+        params = json.loads(params_json)
+        metrics = json.loads(metrics_json)
+        
+        # Start and log run configurations
+        experiment_tracker.start_run(run_name)
+        experiment_tracker.log_parameters(params)
+        experiment_tracker.log_metrics(step=5, metrics=metrics)
+        experiment_tracker.save_run(run_name, params, metrics)
+        
+        latency = time.perf_counter() - start_time
+        LATENCY_SUMMARY.observe(latency)
+        
+        return {
+            "status": "success",
+            "logged_run": run_name,
+            "tracked_parameters": params,
+            "tracked_metrics": metrics
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Experiment tracking error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

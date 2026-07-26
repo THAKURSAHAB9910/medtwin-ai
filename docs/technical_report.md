@@ -173,3 +173,15 @@ To justify decisions to medical board auditors, MedTwin AI implements three form
    $$\text{IG}_j(x) = (x_j - x'_j) \int_{0}^{1} \frac{\partial F(x' + \alpha(x - x'))}{\partial x_j} d\alpha$$
 3. **Grad-CAM**: Computes localized coarse visual heatmaps of class importance by taking target gradients of score $y^c$ with respect to layer feature maps $A^k$:
    $$L^c_{\text{Grad-CAM}} = \text{ReLU}\left( \sum_k \alpha_k^c A^k \right), \quad \text{where } \alpha_k^c = \frac{1}{Z} \sum_{i} \sum_{j} \frac{\partial y^c}{\partial A^k_{i, j}}$$
+
+---
+
+## 14. Experiment Tracking & Resource Profiling Metrics
+
+To enforce reproducibility in medical ML, MedTwin AI formalizes tracking parameters and resource utilization metrics:
+1. **GPU Peak VRAM Footprint**: Measures maximum allocated GPU memory $V_{\text{peak}}$ in gigabytes during training backward passes:
+   $$V_{\text{peak}} = \max_{t \in [0, T]} \text{VRAM}_{\text{allocated}}(t)$$
+2. **LoRA Rank Parametric Scaling**: Quantifies parameter update efficiency where weights are updated by low-rank decomposition matrices $B$ and $A$ of rank $r$:
+   $$\Delta W = B \cdot A, \quad \text{where } B \in \mathbb{R}^{d \times r}, A \in \mathbb{R}^{r \times k}$$
+3. **Hallucination Rate Ingestion**: Normalizes context-unsupported token outputs generated during retrieval QA runs:
+   $$\text{Hallucination Rate} = \frac{\text{Unsupported NER Entities}}{\text{Total Extracted Entities}}$$

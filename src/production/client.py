@@ -364,6 +364,29 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: Explainability API returned status code {response_exp.status_code}")
             print(response_exp.text)
             
+        # --- Experiment Tracking API Call ---
+        track_url = "http://127.0.0.1:8000/tracking/log"
+        track_payload = {
+            "run_name": "Prod_LoRA_Rank_16",
+            "params_json": json.dumps({"lora_rank": 16, "learning_rate": 3e-4, "model_version": "v1.2"}),
+            "metrics_json": json.dumps({"peak_vram_gb": 16.2, "validation_f1": 0.945, "latency_ms": 45.0})
+        }
+        print(f"\nSubmitting experiment run metrics to tracker at {track_url}...")
+        response_tr = requests.post(track_url, data=track_payload)
+        if response_tr.status_code == 200:
+            res_tr_json = response_tr.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI EXPERIMENT RUN TRACKING ")
+            print("="*65)
+            print(f" Status:           {res_tr_json['status']}")
+            print(f" Logged Run:       {res_tr_json['logged_run']}")
+            print(f" Parameters:       {res_tr_json['tracked_parameters']}")
+            print(f" Metrics:          {res_tr_json['tracked_metrics']}")
+            print("="*65)
+        else:
+            print(f"Error: Tracking API returned status code {response_tr.status_code}")
+            print(response_tr.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")
