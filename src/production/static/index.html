@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTwin AI: Multimodal Healthcare Foundation Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #4f46e5;
+            --accent-glow: rgba(79, 70, 229, 0.35);
+            --emerald: #10b981;
+            --crimson: #ef4444;
+            --amber: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100/vh;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        .template-btn-container {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: none;
+        }
+
+        /* Glassmorphism Card Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #a5b4fc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Forms styling */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.65rem;
+            color: white;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        /* Results / Output Panels */
+        .results-container {
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-weight: 600;
+        }
+
+        .log-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #34d399;
+            margin-top: 0.5rem;
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid rgba(52, 211, 153, 0.1);
+        }
+
+        /* Multi-agent Consensus List */
+        .specialist-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .specialist-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.6rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .specialist-role {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .specialist-vote {
+            font-size: 0.8rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .vote-pneumonia {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .vote-normal {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Charts Container */
+        .charts-flex {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .charts-flex {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-box {
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div>
+            <h1 class="app-title">MedTwin AI</h1>
+            <p class="subtitle">Uncertainty-Calibrated Multimodal Medical Consensus & Digital Twin Platform</p>
+        </div>
+        <div class="template-btn-container">
+            <button class="btn btn-secondary" onclick="loadTemplate('pneumonia')">Load Pneumonia Case</button>
+            <button class="btn btn-secondary" onclick="loadTemplate('diabetes')">Load Diabetic Case</button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Card 1: Diagnostic Center & Self-Healing -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🩺 Multimodal Diagnostic Center</h2>
+                <span id="predict-status" style="font-size: 0.8rem; color: var(--text-secondary)">Ready</span>
+            </div>
+            <form id="predict-form" onsubmit="runPrediction(event)">
+                <div class="form-group">
+                    <label for="clinical_note">Physician's Symptoms Note</label>
+                    <textarea id="clinical_note" rows="3" placeholder="Describe symptoms, cough, chest pain, fever metrics..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Laboratory Vitals Panel</label>
+                    <div class="vitals-grid">
+                        <div>
+                            <label for="vital_age">Age</label>
+                            <input type="text" id="vital_age" value="65">
+                        </div>
+                        <div>
+                            <label for="vital_temp">Temperature (°F)</label>
+                            <input type="text" id="vital_temp" value="101.5">
+                        </div>
+                        <div>
+                            <label for="vital_hr">Heart Rate (bpm)</label>
+                            <input type="text" id="vital_hr" value="92">
+                        </div>
+                    </div>
+                    <div class="vitals-grid" style="margin-top: 0.5rem">
+                        <div>
+                            <label for="vital_wbc">WBC Count (/uL)</label>
+                            <input type="text" id="vital_wbc" value="14200">
+                        </div>
+                        <div>
+                            <label for="vital_spo2">Oxygen Saturation (%)</label>
+                            <input type="text" id="vital_spo2" value="91">
+                        </div>
+                        <div>
+                            <label for="vital_bp">Blood Pressure (mmHg)</label>
+                            <input type="text" id="vital_bp" value="130">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="scan_file">Upload Chest Radiograph (Mocked)</label>
+                    <input type="file" id="scan_file" accept="image/*">
+                </div>
+                <button type="submit" class="btn" style="width: 100%">Analyze Patient Case</button>
+            </form>
+
+            <!-- Predict Results -->
+            <div id="predict-results" class="results-container" style="display: none;">
+                <div class="metric-row">
+                    <span class="metric-label">Diagnosis Result</span>
+                    <span id="res-diag" class="metric-value">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Base Probability</span>
+                    <span id="res-base-prob" class="metric-value">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Self-Healed Probability</span>
+                    <span id="res-healed-prob" class="metric-value">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Requires Audit (Uncertain)</span>
+                    <span id="res-audit" class="metric-value">--</span>
+                </div>
+                <label>Clinical self-healing trace log:</label>
+                <div id="res-log" class="log-box"></div>
+            </div>
+        </div>
+
+        <!-- Card 2: Consensus Board -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">👥 Clinical Consensus Board</h2>
+                <span id="consensus-status" style="font-size: 0.8rem; color: var(--text-secondary)">No active board</span>
+            </div>
+            
+            <div class="specialist-list" id="specialist-box">
+                <!-- Specialists will populate here -->
+                <div style="grid-column: span 2; text-align: center; color: var(--text-secondary); padding: 2rem 0;">
+                    Run diagnostic analysis to call consensus specialists.
+                </div>
+            </div>
+
+            <!-- Consensus Outcomes -->
+            <div id="consensus-results" class="results-container" style="display: none; border-left-color: var(--emerald);">
+                <div class="metric-row">
+                    <span class="metric-label">Board Consensus Diagnosis</span>
+                    <span id="board-diag" class="metric-value" style="color: var(--emerald)">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">ICD-10 Code Mapped</span>
+                    <span id="board-icd" class="metric-value">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Specialist Agreement Rate</span>
+                    <span id="board-agreement" class="metric-value">--</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Consensus Uncertainty</span>
+                    <span id="board-uncertainty" class="metric-value">--</span>
+                </div>
+                <div class="metric-row" style="flex-direction: column; align-items: flex-start; margin-top: 0.5rem;">
+                    <span class="metric-label">Disagreements Logged:</span>
+                    <span id="board-disagreements" style="font-size: 0.8rem; color: var(--amber); margin-top: 0.25rem;">None</span>
+                </div>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--card-border)">
+                    <label>Medical RAG Literature Citations:</label>
+                    <div id="rag-citation" style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.2rem"></div>
+                    <div id="rag-text" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Patient Digital Twin -->
+    <div class="card" style="margin-bottom: 2rem">
+        <div class="card-header">
+            <h2 class="card-title">🧬 Patient Digital Twin Simulation</h2>
+        </div>
+        <div class="dashboard-grid" style="grid-template-columns: 1fr 2fr; margin-bottom: 0;">
+            <!-- Controller -->
+            <div>
+                <h3 style="font-size: 1.1rem; color: #a5b4fc; margin-bottom: 1rem;">"What-If" Interventions</h3>
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="slide-weight">Weight Loss Target</label>
+                        <span id="val-weight" style="font-size: 0.9rem; font-weight: 600">-10 kg</span>
+                    </div>
+                    <input type="range" id="slide-weight" min="-25" max="0" value="-10" step="1" oninput="updateSliderLabel('weight', this.value + ' kg')">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="slide-metformin">Daily Metformin Dose</label>
+                        <span id="val-metformin" style="font-size: 0.9rem; font-weight: 600">1000 mg</span>
+                    </div>
+                    <input type="range" id="slide-metformin" min="0" max="2000" value="1000" step="500" oninput="updateSliderLabel('metformin', this.value + ' mg')">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="slide-exercise">Weekly Aerobic Exercise</label>
+                        <span id="val-exercise" style="font-size: 0.9rem; font-weight: 600">4 hours</span>
+                    </div>
+                    <input type="range" id="slide-exercise" min="0" max="10" value="4" step="0.5" oninput="updateSliderLabel('exercise', this.value + ' hours')">
+                </div>
+                <button class="btn" style="width: 100%; background-color: var(--emerald)" onclick="runDigitalTwinSimulation()">Project Trajectories</button>
+                
+                <!-- Risk outcomes -->
+                <div id="twin-risks" class="results-container" style="display: none; border-left-color: var(--amber); margin-top: 1rem;">
+                    <div class="metric-row">
+                        <span class="metric-label">Cardiovascular Risk</span>
+                        <span id="twin-cv-risk" class="metric-value">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Readmission Probability</span>
+                        <span id="twin-readm-risk" class="metric-value">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Estimated Recovery</span>
+                        <span id="twin-recovery" class="metric-value">--</span>
+                    </div>
+                    <div class="metric-row" style="flex-direction: column; align-items: flex-start; margin-top: 0.5rem">
+                        <span class="metric-label">complications:</span>
+                        <span id="twin-complications" style="font-size: 0.8rem; color: var(--amber); margin-top: 0.25rem;">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shaded trajectory charts -->
+            <div>
+                <h3 style="font-size: 1.1rem; color: #a5b4fc; margin-bottom: 1rem;">Longitudinal Vital Forecasts (Shaded 95% Bayesian Credible Intervals)</h3>
+                <div class="charts-flex">
+                    <div class="chart-box">
+                        <canvas id="chart-weight" height="150"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chart-glucose" height="150"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chart-bp" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+
+        function loadTemplate(type) {
+            if (type === 'pneumonia') {
+                document.getElementById("clinical_note").value = "Patient presents with cough and fever. Crackles heard on chest auscultation. Lung opacity in radiograph scans.";
+                document.getElementById("vital_age").value = "65";
+                document.getElementById("vital_temp").value = "102.1";
+                document.getElementById("vital_hr").value = "94";
+                document.getElementById("vital_wbc").value = "14500";
+                document.getElementById("vital_spo2").value = "92";
+                document.getElementById("vital_bp").value = "125";
+            } else if (type === 'diabetes') {
+                document.getElementById("clinical_note").value = "Obese patient seeking diabetic routine check. Standard blood pressure tracking show hypertension. Feeling mild chest pain when climbing stairs.";
+                document.getElementById("vital_age").value = "58";
+                document.getElementById("vital_temp").value = "98.6";
+                document.getElementById("vital_hr").value = "82";
+                document.getElementById("vital_wbc").value = "7200";
+                document.getElementById("vital_spo2").value = "96";
+                document.getElementById("vital_bp").value = "142";
+                
+                // Set twin sliders appropriate for diabetes weight loss targets
+                document.getElementById("slide-weight").value = "-10";
+                document.getElementById("val-weight").innerText = "-10 kg";
+                document.getElementById("slide-metformin").value = "1000";
+                document.getElementById("val-metformin").innerText = "1000 mg";
+            }
+        }
+
+        function updateSliderLabel(vital, val) {
+            document.getElementById(`val-${vital}`).innerText = val;
+        }
+
+        async function runPrediction(event) {
+            event.preventDefault();
+            document.getElementById("predict-status").innerText = "Analyzing...";
+            
+            const note = document.getElementById("clinical_note").value;
+            const vitals = {
+                age: parseFloat(document.getElementById("vital_age").value),
+                temperature: parseFloat(document.getElementById("vital_temp").value),
+                heart_rate: parseFloat(document.getElementById("vital_hr").value),
+                wbc_count: parseFloat(document.getElementById("vital_wbc").value),
+                oxygen_saturation: parseFloat(document.getElementById("vital_spo2").value),
+                blood_pressure: parseFloat(document.getElementById("vital_bp").value)
+            };
+
+            const formData = new FormData();
+            formData.append("clinical_note", note);
+            formData.append("lab_metrics_json", JSON.stringify(vitals));
+            
+            // Append a dummy pixel image if file is empty to satisfy endpoints
+            const fileInput = document.getElementById("scan_file");
+            if (fileInput.files.length > 0) {
+                formData.append("file", fileInput.files[0]);
+            } else {
+                // Create a 1x1 black png pixel to keep post-hoc VLM happy
+                const pixelBlob = new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0, 144, 119, 83, 222, 0, 0, 0, 12, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 0, 2, 0, 1, 2, 63, 13, 14, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130])], {type: "image/png"});
+                formData.append("file", pixelBlob, "radiograph_mock.png");
+            }
+
+            try {
+                // Call /predict endpoint
+                const response = await fetch("/predict", { method: "POST", body: formData });
+                const res = await response.json();
+                
+                document.getElementById("predict-results").style.display = "block";
+                document.getElementById("res-diag").innerText = res.diagnostic_metrics.diagnosis_label;
+                document.getElementById("res-base-prob").innerText = (res.diagnostic_metrics.base_calibrated_prob * 100).toFixed(1) + "%";
+                document.getElementById("res-healed-prob").innerText = (res.diagnostic_metrics.healed_calibrated_prob * 100).toFixed(1) + "%";
+                document.getElementById("res-audit").innerText = res.diagnostic_metrics.requires_clinical_audit ? "Yes" : "No";
+                document.getElementById("res-log").innerText = res.self_healing_trace.reasoning_log;
+                document.getElementById("predict-status").innerText = "Analysis Complete";
+
+                // Now execute consensus board queries
+                document.getElementById("consensus-status").innerText = "Activating Specialist Board...";
+                const consensusRes = await fetch("/consensus", { method: "POST", body: formData });
+                const cRes = await consensusRes.json();
+                
+                document.getElementById("consensus-results").style.display = "block";
+                document.getElementById("board-diag").innerText = cRes.consensus_metrics.consensus_diagnosis;
+                document.getElementById("board-icd").innerText = cRes.consensus_metrics.icd10_code;
+                document.getElementById("board-agreement").innerText = (cRes.consensus_metrics.agreement_rate * 100).toFixed(1) + "%";
+                document.getElementById("board-uncertainty").innerText = (cRes.consensus_metrics.consensus_uncertainty * 100).toFixed(1) + "%";
+                
+                const diagList = cRes.consensus_details.disagreements.map(d => `${d.specialist} suggested ${d.suggested_diagnosis}`).join(", ");
+                document.getElementById("board-disagreements").innerText = diagList || "None";
+                
+                document.getElementById("rag-citation").innerText = cRes.guideline_citations.citation;
+                document.getElementById("rag-text").innerText = cRes.guideline_citations.text;
+
+                // Render specialists list
+                const specialistBox = document.getElementById("specialist-box");
+                specialistBox.innerHTML = "";
+                Object.entries(cRes.specialist_opinions).forEach(([role, opinion]) => {
+                    const voteClass = opinion.diagnosis === "Normal" ? "vote-normal" : "vote-pneumonia";
+                    const item = document.createElement("div");
+                    item.className = "specialist-item";
+                    item.innerHTML = `
+                        <span class="specialist-role">${role}</span>
+                        <span class="specialist-vote ${voteClass}">${opinion.diagnosis}</span>
+                    `;
+                    specialistBox.appendChild(item);
+                });
+                
+                document.getElementById("consensus-status").innerText = "Consensus Reached";
+                
+            } catch(e) {
+                document.getElementById("predict-status").innerText = "Analysis Error";
+                console.error(e);
+            }
+        }
+
+        async function runDigitalTwinSimulation() {
+            const vitals = {
+                weight: parseFloat(document.getElementById("vital_age").value > 60 ? 80.0 : 95.0), # weight mock helper
+                blood_pressure: parseFloat(document.getElementById("vital_bp").value),
+                blood_glucose: 170.0,
+                heart_rate: parseFloat(document.getElementById("vital_hr").value),
+                wbc_count: parseFloat(document.getElementById("vital_wbc").value),
+                oxygen_saturation: parseFloat(document.getElementById("vital_spo2").value)
+            };
+
+            const scenario = {
+                weight_change: parseFloat(document.getElementById("slide-weight").value),
+                metformin_mg: parseFloat(document.getElementById("slide-metformin").value),
+                beta_blocker_mg: 0.0,
+                exercise_hours: parseFloat(document.getElementById("slide-exercise").value),
+                sodium_intake_g: 1.5
+            };
+
+            const formData = new FormData();
+            formData.append("patient_vitals_json", JSON.stringify(vitals));
+            formData.append("what_if_scenario_json", JSON.stringify(scenario));
+
+            try {
+                const response = await fetch("/twin/simulate", { method: "POST", body: formData });
+                const res = await response.json();
+                
+                document.getElementById("twin-risks").style.display = "block";
+                document.getElementById("twin-cv-risk").innerText = (res.risk_scores.cardiovascular_risk * 100).toFixed(1) + "%";
+                document.getElementById("twin-readm-risk").innerText = (res.risk_scores.hospital_readmission_risk * 100).toFixed(1) + "%";
+                document.getElementById("twin-recovery").innerText = res.risk_scores.predicted_recovery_time_days.toFixed(1) + " days";
+                document.getElementById("twin-complications").innerText = res.complications.join(", ");
+                
+                // Render Chart.js forecasts
+                renderChart("chart-weight", "Weight (kg)", res.trajectories.months, res.trajectories.weight.mean, res.trajectories.weight.std, "#84cc16");
+                renderChart("chart-glucose", "Glucose (mg/dL)", res.trajectories.months, res.trajectories.blood_glucose.mean, res.trajectories.blood_glucose.std, "#f43f5e");
+                renderChart("chart-bp", "Pressure (mmHg)", res.trajectories.months, res.trajectories.blood_pressure.mean, res.trajectories.blood_pressure.std, "#3b82f6");
+
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function renderChart(id, label, labels, mean, std, color) {
+            if (charts[id]) {
+                charts[id].destroy();
+            }
+            
+            // Estimate confidence bands
+            const upper = mean.map((m, idx) => m + 1.96 * std[idx]);
+            const lower = mean.map((m, idx) => m - 1.96 * std[idx]);
+
+            const ctx = document.getElementById(id).getContext('2d');
+            charts[id] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: label,
+                            data: mean,
+                            borderColor: color,
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1
+                        },
+                        {
+                            label: '95% Credible Bounds',
+                            data: upper,
+                            borderColor: 'transparent',
+                            backgroundColor: color + '18',
+                            fill: '+1',
+                            tension: 0.1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Lower Bound',
+                            data: lower,
+                            borderColor: 'transparent',
+                            backgroundColor: color + '18',
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+                    }
+                }
+            });
+        }
+        
+        // Load initial template values
+        loadTemplate('pneumonia');
+    </script>
+</body>
+</html>

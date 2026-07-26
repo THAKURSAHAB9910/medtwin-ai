@@ -1,0 +1,29 @@
+# UniDocShield Configuration Parameters
+
+model:
+  visual_backbone: "resnet18"
+  semantic_backbone: "microsoft/Florence-2-base"
+  embed_dim: 256
+  use_mock_vlm: true
+
+data:
+  image_size: [384, 384]
+  train_samples: 40
+  val_samples: 15
+  test_samples: 15
+  batch_size: 4
+  num_workers: 0
+
+training:
+  epochs: 2
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  segmentation_weight: 2.0
+
+calibration:
+  alpha: 0.1 # 90% confidence coverage guarantee
+  bins: 10
+
+self_healing:
+  uncertainty_threshold: 0.35
+  anomaly_patch_threshold: 0.1
