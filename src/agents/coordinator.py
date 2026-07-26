@@ -3,8 +3,8 @@ from typing import Dict, Any, List
 
 from src.agents.state import ClinicalConsensusState, SpecialistOpinion
 from src.agents.specialists import (
-    RadiologistAgent, CardiologistAgent, NeurologistAgent, PathologistAgent,
-    PharmacistAgent, NutritionistAgent, MedicalResearcherAgent, DermatologistAgent
+    RadiologistAgent, PathologistAgent, DermatologistAgent, CardiologistAgent,
+    ClinicalReasoningAgent, DrugSafetyAgent, MedicalLiteratureAgent
 )
 from src.rag.medical_kg import MedicalKnowledgeGraph
 from src.rag.vector_rag import MedicalRAG
@@ -20,13 +20,12 @@ class CoordinatorAgent:
         # Instantiate specialists
         self.specialists = [
             RadiologistAgent(),
-            CardiologistAgent(),
-            NeurologistAgent(),
             PathologistAgent(),
-            PharmacistAgent(),
-            NutritionistAgent(),
-            MedicalResearcherAgent(),
-            DermatologistAgent()
+            DermatologistAgent(),
+            CardiologistAgent(),
+            ClinicalReasoningAgent(),
+            DrugSafetyAgent(),
+            MedicalLiteratureAgent()
         ]
         # Instantiate KG and RAG
         self.kg = MedicalKnowledgeGraph()

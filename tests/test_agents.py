@@ -26,14 +26,14 @@ def test_coordinator_consensus_voting():
     
     state = coordinator.run_consensus(patient)
     assert isinstance(state, ClinicalConsensusState)
-    assert len(state.specialist_opinions) == 8
+    assert len(state.specialist_opinions) == 7
     
     res = state.coordinator_consensus
     assert res["consensus_diagnosis"] == "Pneumonia"
     assert res["agreement_rate"] > 0.5
     assert res["consensus_uncertainty"] < 0.5
     
-    # Valid tests compiled from concurrences should contain Chest Radiograph
-    assert "Chest Radiograph" in res["final_tests"]
-    # Treatment should contain Ceftriaxone or general antibiotics suggested by concurrences
+    # Valid tests compiled from concurrences should contain High-Resolution CT Thorax
+    assert "High-Resolution CT Thorax" in res["final_tests"]
+    # Treatment should contain antibiotic suggested by concurrences
     assert any("antibiotic" in treat.lower() for treat in res["final_treatments"])

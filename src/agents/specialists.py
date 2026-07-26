@@ -304,3 +304,112 @@ class DermatologistAgent(SpecialistAgent):
             recommended_tests=recommended_tests,
             treatment_suggestions=treatment_suggestions
         )
+
+
+class ClinicalReasoningAgent(SpecialistAgent):
+    """
+    Clinical Reasoning Agent: Acts as the clinical generalist synthesizing symptoms and patient files.
+    """
+    def __init__(self):
+        super().__init__("Clinical Reasoning Specialist")
+
+    def analyze(self, patient_data: Dict[str, Any]) -> SpecialistOpinion:
+        note = patient_data.get("clinical_note", "").lower()
+        
+        if "cough" in note and "fever" in note:
+            diagnosis = "Pneumonia"
+            confidence = 0.85
+            evidence = "Clinical symptoms (cough, fever) indicate an acute lower respiratory tract pathology."
+            recommended_tests = ["Basic Metabolic Panel", "Sputum Gram stain"]
+            treatment_suggestions = ["Empiric broad-spectrum antibiotic coverage"]
+        elif "diabetes" in note or "metformin" in note:
+            diagnosis = "Diabetes Mellitus"
+            confidence = 0.80
+            evidence = "Clinical note history reports active diabetes mellitus or glucose regulatory therapies."
+            recommended_tests = ["Hemoglobin A1c (HbA1c) tracking"]
+            treatment_suggestions = ["Metformin therapy adjustments"]
+        else:
+            diagnosis = "Normal"
+            confidence = 0.90
+            evidence = "Patient exhibits general healthy presentation with no active acute respiratory distress."
+            recommended_tests = []
+            treatment_suggestions = []
+
+        return SpecialistOpinion(
+            role=self.role,
+            diagnosis=diagnosis,
+            confidence=confidence,
+            evidence=evidence,
+            recommended_tests=recommended_tests,
+            treatment_suggestions=treatment_suggestions
+        )
+
+
+class DrugSafetyAgent(SpecialistAgent):
+    """
+    Drug Safety Agent: Audits active prescriptions for contraindications and drug-drug interactions.
+    """
+    def __init__(self):
+        super().__init__("Drug Safety Specialist")
+
+    def analyze(self, patient_data: Dict[str, Any]) -> SpecialistOpinion:
+        note = patient_data.get("clinical_note", "").lower()
+        
+        # Check active medications or note details for risk factors
+        has_metformin = "metformin" in note
+        has_contrast = "contrast" in note or "dye" in note
+        
+        if has_metformin and has_contrast:
+            diagnosis = "Drug-Drug Contraindication"
+            confidence = 0.98
+            evidence = "High Risk Identified: Patient is taking Metformin and scheduled for Iodinated Contrast scan. High risk of lactic acidosis."
+            recommended_tests = ["Serum Creatinine Clearance GFR"]
+            treatment_suggestions = ["Hold Metformin 48 hours post-contrast administration"]
+        else:
+            diagnosis = "Normal"
+            confidence = 0.95
+            evidence = "No high-severity drug contraindications detected in the patient's note profile."
+            recommended_tests = []
+            treatment_suggestions = []
+
+        return SpecialistOpinion(
+            role=self.role,
+            diagnosis=diagnosis,
+            confidence=confidence,
+            evidence=evidence,
+            recommended_tests=recommended_tests,
+            treatment_suggestions=treatment_suggestions
+        )
+
+
+class MedicalLiteratureAgent(SpecialistAgent):
+    """
+    Medical Literature Agent: Queries clinical databases for guideline citations.
+    """
+    def __init__(self):
+        super().__init__("Medical Literature Specialist")
+
+    def analyze(self, patient_data: Dict[str, Any]) -> SpecialistOpinion:
+        note = patient_data.get("clinical_note", "").lower()
+        
+        if "pneumonia" in note or "cough" in note:
+            diagnosis = "Pneumonia"
+            confidence = 0.88
+            evidence = "ATS/IDSA Guidelines: Initial therapy for community-acquired pneumonia (CAP) in outpatient settings includes macrolides or beta-lactam."
+            recommended_tests = ["Multiplex PCR viral panel"]
+            treatment_suggestions = ["Consult ATS/IDSA Guidelines 2019"]
+        else:
+            diagnosis = "Normal"
+            confidence = 0.90
+            evidence = "Standard diagnostic surveillance guidelines apply."
+            recommended_tests = []
+            treatment_suggestions = []
+
+        return SpecialistOpinion(
+            role=self.role,
+            diagnosis=diagnosis,
+            confidence=confidence,
+            evidence=evidence,
+            recommended_tests=recommended_tests,
+            treatment_suggestions=treatment_suggestions
+        )

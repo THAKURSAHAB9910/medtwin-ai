@@ -1,0 +1,8 @@
+MEDTWIN AI: CLINICAL INTELLIGENCE DIAGNOSTIC CASE STUDY
+============================================================
+Diagnosis:    Community-Acquired Pneumonia compounded by Type 2 Diabetes Mellitus
+Confidence:   88.00%
+Evidence:     Visual chest radiograph reveals lung opacity/consolidation. Patient is febrile (Temp: 103.1°F). Leukocytosis detected (WBC: 14635.0/uL). Hyperglycemic trending (Blood Glucose: 100.0 mg/dL). Genomic report flags EGFR mutation, compounding pulmonary pathology susceptibility.
+Risk Factors: SIRS criteria matching: systemic response to infection., Hypoxia danger: Oxygen saturation is depressed (88.0%)., Genetic cancer risk: Elevated sensitivity to pulmonary nodules.
+Tests:        Arterial blood gas (ABG) analysis, Hemoglobin A1c (HbA1c) tracking, Chest CT scan with contrast to audit nodule margins, Sputum Gram stain and culture
+Treatments:   Ceftriaxone 1g IV daily + Azithromycin 500mg PO daily, Metformin 500mg PO twice daily (adjust for renal function)

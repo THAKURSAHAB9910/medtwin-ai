@@ -129,6 +129,160 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: Digital Twin API returned status code {response_t.status_code}")
             print(response_t.text)
             
+        # --- VLM Inference API Call (Florence-2 test) ---
+        vlm_url = f"http://127.0.0.1:8000/vlm/infer"
+        buffer.seek(0)
+        files_v = {
+            "file": ("radiograph.png", buffer, "image/png")
+        }
+        vlm_data = {
+            "model_name": "florence-2",
+            "prompt": "ground lung consolidation opacity",
+            "task": "grounding"
+        }
+        print(f"\nSubmitting VLM query to {vlm_url}...")
+        response_v = requests.post(vlm_url, files=files_v, data=vlm_data)
+        if response_v.status_code == 200:
+            res_v_json = response_v.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI CLINICAL VLM RUNNER ")
+            print("="*65)
+            print(f" Model Used:      {res_v_json['model']}")
+            print(f" Task Performed:  {res_v_json['task']}")
+            print(f" Grounded Boxes:  {res_v_json['outputs']['grounded_box']}")
+            print(f" Visual Caption:  {res_v_json['outputs']['caption']}")
+            print("="*65)
+        else:
+            print(f"Error: VLM API returned status code {response_v.status_code}")
+            print(response_v.text)
+            
+        # --- Fine-Tuning Job Trigger API Call ---
+        ft_run_url = f"http://127.0.0.1:8000/finetune/run"
+        ft_status_url = f"http://127.0.0.1:8000/finetune/status"
+        
+        print(f"\nTriggering asynchronous fine-tuning job at {ft_run_url}...")
+        response_ft = requests.post(ft_run_url)
+        if response_ft.status_code == 200:
+            print("Fine-tuning job successfully submitted. Checking status...")
+            response_st = requests.get(ft_status_url)
+            st_json = response_st.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI ADAPTER TRAINING STATUS ")
+            print("="*65)
+            print(f" Job Status:        {st_json['status']}")
+            print(f" Current Epoch:     {st_json['epoch']}")
+            print(f" Training Loss:     {st_json['loss']:.4f}")
+            print(f" Val Accuracy:      {st_json['accuracy']:.2%}")
+            print("="*65)
+        else:
+            print(f"Error: Fine-tuning API returned status code {response_ft.status_code}")
+            print(response_ft.text)
+            
+        # --- NLP RAG Query API Call ---
+        nlp_query_url = f"http://127.0.0.1:8000/nlp/query"
+        nlp_payload = {
+            "query": "What is the recommended treatment for Pneumonia according to guidelines?"
+        }
+        print(f"\nSubmitting RAG query to {nlp_query_url}...")
+        response_nlp = requests.post(nlp_query_url, data=nlp_payload)
+        if response_nlp.status_code == 200:
+            res_nlp_json = response_nlp.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI CLINICAL NLP RAG RESPONSE ")
+            print("="*65)
+            print(f" Query submitted:  {res_nlp_json['query']}")
+            print(f" Generated Answer: {res_nlp_json['answer']}")
+            print(f" RAG Faithfulness: {res_nlp_json['evaluation_metrics']['faithfulness_score']:.2%}")
+            print(f" Hallucination:    {res_nlp_json['evaluation_metrics']['hallucination_rate']:.2%}")
+            if len(res_nlp_json["drug_interaction_warnings"]) > 0:
+                print(f" Warnings:         {res_nlp_json['drug_interaction_warnings']}")
+            print("="*65)
+        else:
+            print(f"Error: NLP RAG API returned status code {response_nlp.status_code}")
+            print(response_nlp.text)
+            
+        # --- Multimodal Clinical Intelligence API Call ---
+        intel_url = "http://127.0.0.1:8000/intelligence/diagnose"
+        intel_payload = {
+            "clinical_note": "Patient presents with cough and fever. Scheduled for abdominal CT scan with Contrast Dye.",
+            "lab_metrics_json": json.dumps({"age": 62, "temperature": 101.2, "heart_rate": 92, "wbc_count": 14500, "oxygen_saturation": 94, "blood_pressure": 142, "blood_glucose": 165}),
+            "timeline_events_json": json.dumps([
+                {"date": "2026-03-10", "type": "Note", "content": "Diabetes tracking shows hyperglycemia."}
+            ]),
+            "genomic_data_json": json.dumps({"EGFR_mutation": "mutated"})
+        }
+        print(f"\nSubmitting Multimodal case file to {intel_url}...")
+        response_intel = requests.post(intel_url, data=intel_payload)
+        if response_intel.status_code == 200:
+            res_intel_json = response_intel.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI MULTIMODAL CLINICAL INTELLIGENCE DIAGNOSIS ")
+            print("="*65)
+            print(f" DIAGNOSIS:  {res_intel_json['diagnosis']}")
+            print(f" CONFIDENCE:  {res_intel_json['confidence_score']:.2%}")
+            print(f" EVIDENCE:    {res_intel_json['evidence']}")
+            print(f" RISKS:       {res_intel_json['risk_factors']}")
+            print(f" TESTS:       {res_intel_json['recommended_investigations']}")
+            print(f" TREATMENTS:  {res_intel_json['treatment_suggestions_research']}")
+            print("="*65)
+        else:
+            print(f"Error: Intelligence API returned status code {response_intel.status_code}")
+            print(response_intel.text)
+            
+        # --- Multi-Agent Clinical Consensus API Call ---
+        consensus_url = "http://127.0.0.1:8000/agents/consensus"
+        consensus_payload = {
+            "clinical_note": "Patient presents with cough and fever. Scheduled for abdominal CT scan with Contrast Dye.",
+            "lab_metrics_json": json.dumps({"age": 62, "temperature": 101.2, "heart_rate": 92, "wbc_count": 14500, "oxygen_saturation": 94, "blood_pressure": 142, "blood_glucose": 165})
+        }
+        print(f"\nSubmitting case file to agent consensus board at {consensus_url}...")
+        response_cons = requests.post(consensus_url, data=consensus_payload)
+        if response_cons.status_code == 200:
+            res_cons_json = response_cons.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI MULTI-AGENT BOARD CONSENSUS ")
+            print("="*65)
+            print(f" CONSENSUS:   {res_cons_json['consensus_diagnosis']} ({res_cons_json['icd10_code']})")
+            print(f" AGREEMENT:   {res_cons_json['agreement_rate']:.2%}")
+            print(f" UNCERTAINTY: {res_cons_json['consensus_uncertainty']:.2%}")
+            print(f" RAG CITATION: {res_cons_json['literature_citation']}")
+            print(f" DISAGREEMENTS: {len(res_cons_json['disagreements'])} agents")
+            print("="*65)
+        else:
+            print(f"Error: Consensus API returned status code {response_cons.status_code}")
+            print(response_cons.text)
+            
+        # --- Medical Imaging API Call ---
+        from PIL import Image
+        imaging_url = "http://127.0.0.1:8000/imaging/analyze"
+        # Create a mock image file
+        mock_img_io = io.BytesIO()
+        Image.new("RGB", (256, 256), color="grey").save(mock_img_io, format="PNG")
+        mock_img_io.seek(0)
+        
+        files_payload = {
+            "file": ("mock_scan.png", mock_img_io, "image/png")
+        }
+        data_payload = {
+            "modality": "mri",
+            "task": "classify"
+        }
+        print(f"\nSubmitting brain MRI scan to {imaging_url}...")
+        response_img = requests.post(imaging_url, data=data_payload, files=files_payload)
+        if response_img.status_code == 200:
+            res_img_json = response_img.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI IMAGING CLASSIFICATION ")
+            print("="*65)
+            print(f" Modality Routed: {res_img_json['modality']}")
+            print(f" Task Type:      {res_img_json['task']}")
+            print(f" Diagnosis:      {res_img_json['diagnosis']}")
+            print(f" Confidence:     {res_img_json['confidence']:.2%}")
+            print("="*65)
+        else:
+            print(f"Error: Imaging API returned status code {response_img.status_code}")
+            print(response_img.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")

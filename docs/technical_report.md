@@ -62,3 +62,80 @@ The Patient Digital Twin models dynamic physiological state transitions over tim
    - Metformin: Reduces glucose recursively.
    - Weight loss: Drops systolic blood pressure by 1 mmHg per kg lost.
 5. **Citations & Guidelines**: The RAG subsystem retrieves official American Diabetes Association (ADA Standards of Care) and American Heart Association (AHA Hypertension guidelines) details based on the final forecasted states.
+
+---
+
+## 5. Medical Vision Language Model (VLM) Research Module
+
+To support multimodal clinical grounding and document OCR processing, MedTwin AI integrates a Unified VLM registry:
+1. **Model Specifications**:
+   - **Qwen2-VL**: High-resolution vision-language model processing spatial visual frames and complex multi-modal reports.
+   - **BioMedCLIP**: Language-image contrastive model matching visual embeddings $E_v$ to clinical text label embeddings $E_t$:
+     $$\text{Similarity} = \frac{E_v \cdot E_t}{\|E_v\| \|E_t\|}$$
+   - **Florence-2**: Localized vision model returning bounding boxes $B = [x_{\text{min}}, y_{\text{min}}, x_{\text{max}}, y_{\text{max}}]$ for visual pathology grounding.
+   - **LayoutLMv3**: Multi-modal layout-aware OCR classifier combining visual, text, and 2D spatial position embeddings.
+2. **Unified Inference Interface**: Exposes a common API to switch models dynamically and extract structured confidence indicators.
+
+---
+
+## 6. Clinical Fine-Tuning & Adapter Pipeline (PEFT)
+
+To optimize biomedical foundation models on patient note vocabularies without unfreezing raw layers, MedTwin AI implements Parameter-Efficient Fine-Tuning (PEFT):
+1. **LoRA (Low-Rank Adaptation)**: Parametrizes weight updates $\Delta W$ by factorizing it into two low-rank matrices $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times k}$ (where rank $r \ll \min(d, k)$):
+   $$W_{\text{updated}} = W_0 + \Delta W = W_0 + \frac{\alpha}{r} (A \cdot B)$$
+   During Supervised Fine-Tuning (SFT), base weights $W_0$ remain frozen ($\nabla_{W_0} \mathcal{L} = 0$), drastically reducing optimizer VRAM requirements.
+2. **QLoRA (Quantized Low-Rank Adaptation)**: Quantizes the base weights $W_0$ to 4-bit NormalFloat (NF4) representations, loading double-quantized scaling factors. During backpropagation, the gradients are calculated exclusively on active high-precision 16-bit LoRA adapter parameters:
+   $$Y = \text{dequantize}(W_{\text{NF4}}) \cdot X + \frac{\alpha}{r} (A \cdot B) \cdot X$$
+3. **Supervised Fine-Tuning Loss**: Calculated using cross-entropy over target labels while masking user prompt prompts:
+   $$\mathcal{L}_{\text{SFT}} = -\sum_{i \in T} \log P(y_i \mid y_{<i}, X_{\text{prompt}})$$
+   where prompt tokens $i \notin T$ are masked out (set to $-100$).
+
+---
+
+## 7. Medical NLP & Clinical RAG Pipeline
+
+To optimize semantic search, patient timelines, and QA evaluation over clinical documents, MedTwin AI implements a Medical NLP pipeline:
+1. **Cosine Similarity Retrieval**: Let query embedding be $q$ and document embedding be $d_i$, both unit-normalized. Cosine similarity calculates retrieval rankings:
+   $$\text{Sim}(q, d_i) = q \cdot d_i = \sum_{j=1}^{D} q_j d_{i, j}$$
+2. **Faithfulness & Hallucination Metrics**: Faithfulness measures context alignment, while Hallucination represents unsupported claims:
+   $$\text{Faithfulness} = \frac{|E_{\text{answer}} \cap (E_{\text{context}} \cup E_{\text{query}})|}{|E_{\text{answer}}|}$$
+   $$\text{Hallucination Rate} = 1.0 - \text{Faithfulness}$$
+   where $E_{\text{answer}}$ represents the Named Entities (medications, symptoms, diseases) extracted from the generated answer.
+3. **Timeline Compilation**: Orders chronological clinical events by mapping datetime timestamps:
+   $$t_0 < t_1 < \dots < t_N$$
+
+---
+
+## 8. Multimodal Clinical Intelligence & Joint Reasoning
+
+To unify diagnostics across visual, textual, tabular, and genomic data inputs, MedTwin AI implements a joint clinical reasoning module:
+1. **Multimodal State Vector**: Ingests patient note tokens $T$, vital indices $V$, chronological narratives $C$, and genomic mutation binaries $G$:
+   $$S = \{T, V, C, G\}$$
+2. **Joint Diagnostic Likelihood**: Determines primary diagnosis $D_k$ using aligned visual opacities and vital thresholds:
+   $$P(D_k \mid S) = \sigma(\text{Linear}(E_v) + \beta_{\text{temp}} (T_{\text{vital}} - 98.6) + \gamma_g G_{\text{mut}})$$
+   where $E_v$ represents the visual VLM radiograph features, and $G_{\text{mut}}$ matches active mutations (e.g. EGFR).
+3. **Evidence Explainability**: Automatically traces active pathways (SIRS indicators, hypoxemia) to produce structural justifications of diagnostic confidence scores.
+
+---
+
+## 9. Multi-Agent Board Consensus & Uncertainty Mechanics
+
+To evaluate diagnosis alignment across isolated medical specialities, MedTwin AI coordinates a Multi-Agent board consisting of $N=7$ specialists:
+1. **Consensus Vote**: Each agent $A_i$ produces an independent opinion diagnostic label $D_i$ with confidence $c_i$. The board resolves consensus via plurality voting:
+   $$D_{\text{consensus}} = \arg\max_D \sum_{i=1}^{N} \mathbb{I}(D_i = D)$$
+   If there is a tie, it selects the diagnosis with the highest cumulative confidence $\sum c_i$.
+2. **Board Agreement Rate**: Computes the ratio of specialists conforming to the majority:
+   $$\text{Agreement Rate} = \frac{\sum_{i=1}^{N} \mathbb{I}(D_i = D_{\text{consensus}})}{N}$$
+3. **Consensus Uncertainty**: Quantifies conflict entropy or misalignment bounds among board opinions:
+   $$\text{Uncertainty} = 1.0 - \text{Agreement Rate}$$
+
+---
+
+## 10. Medical Image Research & Vision Formulations
+
+To process heterogeneous imaging modalities (X-ray, MRI, CT, Retinal, Skin, Histo, Micro, Ultrasound, Wound) across diverse tasks (Segmentation, Classification, Detection, Localization, Severity), MedTwin AI implements specialized vision metrics:
+1. **Intersection over Union (IoU)**: Evaluates pixel-level lesion segmentation boundaries relative to ground truth masks:
+   $$\text{IoU} = \frac{|M_{\text{pred}} \cap M_{\text{truth}}|}{|M_{\text{pred}} \cup M_{\text{truth}}|}$$
+2. **Mean Average Precision (mAP)**: Evaluates bounding box coordinates for anomaly detection at varied IoU thresholds.
+3. **Centroid Localization**: Maps bounding box coordinates $[x_{\text{min}}, y_{\text{min}}, x_{\text{max}}, y_{\text{max}}]$ to anomaly center coordinates:
+   $$C = \left[ \frac{x_{\text{min}} + x_{\text{max}}}{2}, \frac{y_{\text{min}} + y_{\text{max}}}{2} \right]$$
