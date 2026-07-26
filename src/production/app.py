@@ -27,6 +27,8 @@ from src.imaging.pipeline import MedicalImagingPipeline
 from src.imaging.benchmarker import ImagingArchitectureBenchmarker
 from src.ocr.pipeline import MedicalOCRPipeline
 from src.ocr.benchmarker import OCRArchitectureBenchmarker
+from src.synthetic.engine import SyntheticMedicalDataEngine
+from src.synthetic.evaluator import SyntheticDataEvaluator
 
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
@@ -56,6 +58,8 @@ imaging_pipeline: Optional[MedicalImagingPipeline] = None
 imaging_benchmarker: Optional[ImagingArchitectureBenchmarker] = None
 ocr_pipeline: Optional[MedicalOCRPipeline] = None
 ocr_benchmarker: Optional[OCRArchitectureBenchmarker] = None
+synthetic_engine: Optional[SyntheticMedicalDataEngine] = None
+synthetic_evaluator: Optional[SyntheticDataEvaluator] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -69,6 +73,7 @@ def load_model():
     global intel_fuser, intel_reasoning_engine
     global imaging_pipeline, imaging_benchmarker
     global ocr_pipeline, ocr_benchmarker
+    global synthetic_engine, synthetic_evaluator
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -107,6 +112,10 @@ def load_model():
     # Initialize Medical OCR
     ocr_pipeline = MedicalOCRPipeline(nlp_ner)
     ocr_benchmarker = OCRArchitectureBenchmarker()
+    
+    # Initialize Synthetic Data Engine
+    synthetic_engine = SyntheticMedicalDataEngine()
+    synthetic_evaluator = SyntheticDataEvaluator()
     
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
@@ -645,6 +654,53 @@ async def analyze_medical_document(
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OCR processing error: {str(e)}")
+
+@app.post("/synthetic/generate")
+def generate_synthetic_profile(
+    modality: str = Form(...),
+    condition: str = Form(...),
+    quality: str = Form(...) # high, low-quality, blurred, noisy
+):
+    """
+    Generates synthetic medical scan images and clinical documents matching conditions.
+    """
+    REQUEST_COUNT.labels(endpoint="/synthetic/generate").inc()
+    start_time = time.perf_counter()
+    
+    if synthetic_engine is None:
+        raise HTTPException(status_code=503, detail="Synthetic engine offline")
+        
+    try:
+        # Generate image
+        pil_img = synthetic_engine.generate_image(modality, condition, quality)
+        
+        # Save image to base64
+        buffered = io.BytesIO()
+        pil_img.save(buffered, format="PNG")
+        import base64
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        
+        # Generate documents
+        prescription = synthetic_engine.generate_prescription(condition)
+        summary = synthetic_engine.generate_discharge_summary(condition)
+        labs = synthetic_engine.generate_lab_report(condition)
+        history = synthetic_engine.generate_patient_history(condition)
+        
+        latency = time.perf_counter() - start_time
+        LATENCY_SUMMARY.observe(latency)
+        
+        return {
+            "condition": condition,
+            "modality": modality,
+            "quality": quality,
+            "synthetic_image_b64": img_str,
+            "synthetic_prescription": prescription,
+            "synthetic_discharge_summary": summary,
+            "synthetic_lab_report": labs,
+            "synthetic_patient_history": history
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Synthetic generation error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

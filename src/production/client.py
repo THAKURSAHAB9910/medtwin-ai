@@ -311,6 +311,30 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: OCR API returned status code {response_ocr.status_code}")
             print(response_ocr.text)
             
+        # --- Synthetic Generation API Call ---
+        synth_url = "http://127.0.0.1:8000/synthetic/generate"
+        synth_payload = {
+            "modality": "mri",
+            "condition": "alkaptonuria",
+            "quality": "blurred"
+        }
+        print(f"\nRequesting synthetic data generation for Alkaptonuria at {synth_url}...")
+        response_synth = requests.post(synth_url, data=synth_payload)
+        if response_synth.status_code == 200:
+            res_synth_json = response_synth.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI SYNTHETIC DATA GENERATION ")
+            print("="*65)
+            print(f" Condition:       {res_synth_json['condition']}")
+            print(f" Modality:        {res_synth_json['modality']}")
+            print(f" Prescription:    \"{res_synth_json['synthetic_prescription']}\"")
+            print(f" Lab Report:      \"{res_synth_json['synthetic_lab_report']}\"")
+            print(f" Base64 Image:    {res_synth_json['synthetic_image_b64'][:40]}... (Truncated)")
+            print("="*65)
+        else:
+            print(f"Error: Synthetic API returned status code {response_synth.status_code}")
+            print(response_synth.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")

@@ -149,3 +149,14 @@ To ingest and index clinical documents (Prescriptions, Lab reports, Discharge su
    $$\text{CA} = 1.0 - \frac{\text{EditDistance}(Y_{\text{pred}}, Y_{\text{truth}})}{\max(|Y_{\text{pred}}|, |Y_{\text{truth}}|)}$$
 2. **Medical Terminology Precision**: Measures vocabulary conformity mapping output terms to structured nomenclatures (ICD-10, RxNorm).
 3. **Clinical Entity Recall**: Tracks key clinical parameters (drug name $D_j$, dosage $S_j$) successfully isolated by the Named Entity Recognition (NER) tagger.
+
+---
+
+## 12. Synthetic Medical Data & Noise Degradations
+
+To simulate clinical scan imperfections, MedTwin AI implements mathematical modelings of image degradation:
+1. **Gaussian Blur Transformation**: Convolves the clean image matrix $I$ with a 2D Gaussian kernel $G_{\sigma}$ to simulate motion or focusing errors:
+   $$I_{\text{blurred}}(x, y) = I(x, y) * G_{\sigma}(x, y) = \sum_{u, v} I(x-u, y-v) \frac{1}{2\pi\sigma^2} e^{-\frac{u^2+v^2}{2\sigma^2}}$$
+2. **Gaussian Noise Injection**: Adds random perturbations drawn from a normal distribution to simulate sensor electronic noise:
+   $$I_{\text{noisy}}(x, y) = \text{clip}(I(x, y) + \mathcal{N}(0, \sigma^2), 0, 255)$$
+3. **Orphan Condition Profiling**: Synthesizes structured data logs mapping specific low-frequency disease symptoms (such as Homogentisic Acid dark pigmentation in Alkaptonuria) to enhance classifier training samples.
