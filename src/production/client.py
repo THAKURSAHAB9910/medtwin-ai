@@ -387,6 +387,24 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: Tracking API returned status code {response_tr.status_code}")
             print(response_tr.text)
             
+        # --- Distributed Training & Optimization API Call ---
+        opt_url = "http://127.0.0.1:8000/optimization/benchmark"
+        print(f"\nRequesting runtime optimization benchmarks from {opt_url}...")
+        response_opt = requests.post(opt_url)
+        if response_opt.status_code == 200:
+            res_opt_json = response_opt.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI RUNTIME OPTIMIZATION BENCHMARK ")
+            print("="*65)
+            print(f" Status:           {res_opt_json['status']}")
+            print(f" Saved Plot Path:  {res_opt_json['benchmark_plot_saved']}")
+            print(f" TensorRT Latency: {res_opt_json['inference_benchmarks']['TensorRT']['latency_ms']} ms")
+            print(f" TensorRT Throughput: {res_opt_json['inference_benchmarks']['TensorRT']['throughput']} inf/sec")
+            print("="*65)
+        else:
+            print(f"Error: Optimization API returned status code {response_opt.status_code}")
+            print(response_opt.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")

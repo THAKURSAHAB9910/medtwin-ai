@@ -32,6 +32,9 @@ from src.synthetic.evaluator import SyntheticDataEvaluator
 from src.explainability.lab import MedicalFailureAnalysisLab
 from src.explainability.explain import ClinicalPredictionExplainer
 from src.tracking.tracker import ClinicalExperimentTracker
+from src.optimization.distributed import DistributedTrainingOrchestrator
+from src.optimization.inference import InferenceOptimizer
+from src.optimization.benchmarker import OptimizationBenchmarker
 
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
@@ -66,6 +69,9 @@ clinical_explainer: Optional[ClinicalPredictionExplainer] = None
 synthetic_engine: Optional[SyntheticMedicalDataEngine] = None
 synthetic_evaluator: Optional[SyntheticDataEvaluator] = None
 experiment_tracker: Optional[ClinicalExperimentTracker] = None
+dist_orchestrator: Optional[DistributedTrainingOrchestrator] = None
+inf_optimizer: Optional[InferenceOptimizer] = None
+opt_benchmarker: Optional[OptimizationBenchmarker] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -82,6 +88,7 @@ def load_model():
     global synthetic_engine, synthetic_evaluator
     global failure_lab, clinical_explainer
     global experiment_tracker
+    global dist_orchestrator, inf_optimizer, opt_benchmarker
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -131,6 +138,11 @@ def load_model():
     
     # Initialize Experiment Tracker
     experiment_tracker = ClinicalExperimentTracker()
+    
+    # Initialize Distributed Training & Inference Optimization Modules
+    dist_orchestrator = DistributedTrainingOrchestrator()
+    inf_optimizer = InferenceOptimizer()
+    opt_benchmarker = OptimizationBenchmarker()
     
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
@@ -813,6 +825,35 @@ def log_experiment_run(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Experiment tracking error: {str(e)}")
+
+@app.post("/optimization/benchmark")
+def run_optimization_benchmarking():
+    """
+    Triggers dynamic benchmarks comparing latency, memory, cost ratios, and throughput.
+    """
+    REQUEST_COUNT.labels(endpoint="/optimization/benchmark").inc()
+    start_time = time.perf_counter()
+    
+    if opt_benchmarker is None:
+        raise HTTPException(status_code=503, detail="Benchmarker module offline")
+        
+    try:
+        # Run benchmarks
+        benchmarks = opt_benchmarker.run_inference_benchmarks()
+        
+        # Save plot visualization locally
+        opt_benchmarker.plot_benchmarks(benchmarks, "docs/optimization_benchmarks.png")
+        
+        latency = time.perf_counter() - start_time
+        LATENCY_SUMMARY.observe(latency)
+        
+        return {
+            "status": "success",
+            "inference_benchmarks": benchmarks,
+            "benchmark_plot_saved": "docs/optimization_benchmarks.png"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Benchmarking execution error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
