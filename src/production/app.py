@@ -25,6 +25,8 @@ from src.intelligence.clinical_fuser import MultimodalIntelligenceFuser
 from src.intelligence.reasoning_engine import MultimodalReasoningEngine
 from src.imaging.pipeline import MedicalImagingPipeline
 from src.imaging.benchmarker import ImagingArchitectureBenchmarker
+from src.ocr.pipeline import MedicalOCRPipeline
+from src.ocr.benchmarker import OCRArchitectureBenchmarker
 
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
@@ -52,6 +54,8 @@ intel_fuser: Optional[MultimodalIntelligenceFuser] = None
 intel_reasoning_engine: Optional[MultimodalReasoningEngine] = None
 imaging_pipeline: Optional[MedicalImagingPipeline] = None
 imaging_benchmarker: Optional[ImagingArchitectureBenchmarker] = None
+ocr_pipeline: Optional[MedicalOCRPipeline] = None
+ocr_benchmarker: Optional[OCRArchitectureBenchmarker] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -64,6 +68,7 @@ def load_model():
     global nlp_embedder, nlp_vector_db, nlp_ner, nlp_timeline_compiler, nlp_rag_engine
     global intel_fuser, intel_reasoning_engine
     global imaging_pipeline, imaging_benchmarker
+    global ocr_pipeline, ocr_benchmarker
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -99,11 +104,15 @@ def load_model():
     imaging_pipeline = MedicalImagingPipeline()
     imaging_benchmarker = ImagingArchitectureBenchmarker()
     
+    # Initialize Medical OCR
+    ocr_pipeline = MedicalOCRPipeline(nlp_ner)
+    ocr_benchmarker = OCRArchitectureBenchmarker()
+    
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
         ("American Diabetes Association (ADA) Care Standard: Initiate Metformin 500mg PO twice daily as baseline therapy for diabetes mellitus.", {"source": "ADA Diabetes 2024"})
     ])
-    print("Models, calibrator, multi-agent coordinator, digital twin, VLM registry, Clinical NLP, Intelligence, and Medical Imaging modules initialized.")
+    print("Models, calibrator, multi-agent coordinator, digital twin, VLM registry, Clinical NLP, Intelligence, Medical Imaging, and OCR modules initialized.")
 
 @app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
@@ -608,6 +617,34 @@ async def analyze_medical_image(
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Imaging pipeline processing error: {str(e)}")
+
+@app.post("/ocr/analyze")
+async def analyze_medical_document(
+    document_type: str = Form(...),
+    file: UploadFile = File(...)
+):
+    """
+    Scans patient document files and extracts named clinical entities.
+    """
+    REQUEST_COUNT.labels(endpoint="/ocr/analyze").inc()
+    start_time = time.perf_counter()
+    
+    if ocr_pipeline is None:
+        raise HTTPException(status_code=503, detail="OCR pipeline offline")
+        
+    try:
+        contents = await file.read()
+        pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
+        
+        # Extract text & entities
+        res = ocr_pipeline.extract_text_and_entities(pil_img, document_type)
+        
+        latency = time.perf_counter() - start_time
+        LATENCY_SUMMARY.observe(latency)
+        
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OCR processing error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

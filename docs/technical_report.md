@@ -139,3 +139,13 @@ To process heterogeneous imaging modalities (X-ray, MRI, CT, Retinal, Skin, Hist
 2. **Mean Average Precision (mAP)**: Evaluates bounding box coordinates for anomaly detection at varied IoU thresholds.
 3. **Centroid Localization**: Maps bounding box coordinates $[x_{\text{min}}, y_{\text{min}}, x_{\text{max}}, y_{\text{max}}]$ to anomaly center coordinates:
    $$C = \left[ \frac{x_{\text{min}} + x_{\text{max}}}{2}, \frac{y_{\text{min}} + y_{\text{max}}}{2} \right]$$
+
+---
+
+## 11. Medical OCR & Document Intelligence Formulations
+
+To ingest and index clinical documents (Prescriptions, Lab reports, Discharge summaries, Insurance sheets, Referrals, Handwritten notes, Certificates), MedTwin AI quantifies document recognition performance via text alignment:
+1. **Character Accuracy (CA)**: Computed via the Levenshtein distance between OCR output strings $Y_{\text{pred}}$ and reference ground truth transcripts $Y_{\text{truth}}$:
+   $$\text{CA} = 1.0 - \frac{\text{EditDistance}(Y_{\text{pred}}, Y_{\text{truth}})}{\max(|Y_{\text{pred}}|, |Y_{\text{truth}}|)}$$
+2. **Medical Terminology Precision**: Measures vocabulary conformity mapping output terms to structured nomenclatures (ICD-10, RxNorm).
+3. **Clinical Entity Recall**: Tracks key clinical parameters (drug name $D_j$, dosage $S_j$) successfully isolated by the Named Entity Recognition (NER) tagger.

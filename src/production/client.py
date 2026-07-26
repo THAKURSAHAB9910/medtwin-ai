@@ -283,6 +283,34 @@ def run_client_simulation(port: int = 8000):
             print(f"Error: Imaging API returned status code {response_img.status_code}")
             print(response_img.text)
             
+        # --- Medical OCR API Call ---
+        ocr_url = "http://127.0.0.1:8000/ocr/analyze"
+        mock_doc_io = io.BytesIO()
+        Image.new("RGB", (300, 100), color="white").save(mock_doc_io, format="PNG")
+        mock_doc_io.seek(0)
+        
+        files_payload_ocr = {
+            "file": ("mock_prescription.png", mock_doc_io, "image/png")
+        }
+        data_payload_ocr = {
+            "document_type": "prescription"
+        }
+        print(f"\nSubmitting scanned prescription to {ocr_url}...")
+        response_ocr = requests.post(ocr_url, data=data_payload_ocr, files=files_payload_ocr)
+        if response_ocr.status_code == 200:
+            res_ocr_json = response_ocr.json()
+            print("\n" + "="*65)
+            print(" MEDTWIN AI DOCUMENT OCR ")
+            print("="*65)
+            print(f" Document type:    {res_ocr_json['document_type']}")
+            print(f" OCR Text parsed:  \"{res_ocr_json['ocr_text']}\"")
+            print(f" Extracted Meds:   {res_ocr_json['extracted_medications']}")
+            print(f" Extracted Doses:  {res_ocr_json['extracted_dosages']}")
+            print("="*65)
+        else:
+            print(f"Error: OCR API returned status code {response_ocr.status_code}")
+            print(response_ocr.text)
+            
     except requests.exceptions.ConnectionError:
         print("\nError: Connection Refused. Please start the FastAPI server first using:")
         print("  python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000")
