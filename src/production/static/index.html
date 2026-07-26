@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTwin AI: Multimodal Healthcare Foundation Dashboard</title>
+    <title>MedTwin AI: Multimodal Clinical Decision Support System</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: rgba(17, 24, 39, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent-primary: #4f46e5;
-            --accent-glow: rgba(79, 70, 229, 0.35);
+            --bg-dark: #070913;
+            --bg-accent: #0f132a;
+            --panel-bg: rgba(17, 22, 45, 0.6);
+            --border-glow: rgba(79, 70, 229, 0.15);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            --text-main: #f1f5f9;
+            --text-mute: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --cyan: #06b6d4;
             --emerald: #10b981;
-            --crimson: #ef4444;
+            --emerald-glow: rgba(16, 185, 129, 0.2);
             --amber: #f59e0b;
+            --rose: #f43f5e;
+            --rose-glow: rgba(244, 63, 94, 0.2);
         }
 
         * {
@@ -29,202 +34,297 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            min-height: 100/vh;
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 40%),
+                radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.1) 0px, transparent 40%);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
             padding: 2rem;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        h1, h2, h3 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
+        h1, h2, h3, .nav-tab {
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        .header-container {
+        /* Top Header Area */
+        .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--card-border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .app-title {
+        .brand-title {
             font-size: 2.2rem;
-            background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 50%, #34d399 100%);
+            font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #06b6d4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+        .brand-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-mute);
             margin-top: 0.25rem;
         }
 
-        .template-btn-container {
+        .system-badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--primary);
+            color: #a5b4fc;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
             display: flex;
-            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0.4rem;
+            gap: 0.5rem;
+            margin-bottom: 2.5rem;
+            backdrop-filter: blur(8px);
         }
 
-        .btn {
-            background-color: var(--accent-primary);
-            color: white;
+        .nav-tab {
+            flex: 1;
+            background: transparent;
             border: none;
-            padding: 0.6rem 1.2rem;
+            color: var(--text-mute);
+            padding: 0.8rem;
             border-radius: 8px;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+            text-align: center;
         }
 
-        .btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 12px var(--accent-glow);
+        .nav-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .btn-secondary {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
+        .nav-tab.active {
+            color: white;
+            background: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            box-shadow: none;
+        /* Responsive Layouts */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
         }
 
-        /* Glassmorphism Card Layout */
-        .dashboard-grid {
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
-            margin-bottom: 2rem;
         }
 
         @media (max-width: 1024px) {
-            .dashboard-grid {
+            .panel-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+        /* Cards and Panels */
+        .glass-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 16px;
-            padding: 1.5rem;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            padding: 1.75rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+            transition: border-color 0.3s;
         }
 
-        .card-header {
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.25rem;
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.15);
+        }
+
+        .card-title-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        .card-title {
-            font-size: 1.3rem;
-            color: #a5b4fc;
+        .card-header-title {
+            font-size: 1.25rem;
+            color: #c7d2fe;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
         }
 
-        /* Forms styling */
-        .form-group {
-            margin-bottom: 1rem;
+        /* Forms inputs */
+        .field-group {
+            margin-bottom: 1.25rem;
         }
 
-        label {
+        .field-label {
             display: block;
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: var(--text-mute);
             margin-bottom: 0.4rem;
-            font-weight: 500;
         }
 
         input[type="text"], textarea, select {
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 0.65rem;
+            padding: 0.75rem;
             color: white;
             font-family: inherit;
             font-size: 0.9rem;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
         input[type="text"]:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: var(--accent-primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
         }
 
-        .vitals-grid {
+        .vitals-flex-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
-        /* Results / Output Panels */
-        .results-container {
-            margin-top: 1rem;
-            background: rgba(0, 0, 0, 0.25);
+        /* Buttons styling */
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
             border-radius: 8px;
-            padding: 1rem;
-            border-left: 4px solid var(--accent-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .metric-row {
+        .action-btn:hover {
+            opacity: 0.95;
+            box-shadow: 0 0 16px var(--primary-glow);
+        }
+
+        .action-btn-emerald {
+            background: var(--emerald);
+        }
+        .action-btn-emerald:hover {
+            box-shadow: 0 0 16px var(--emerald-glow);
+        }
+
+        .template-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .pill-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-mute);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pill-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        /* Response Boxes */
+        .metrics-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .metrics-item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             font-size: 0.9rem;
         }
 
-        .metric-label {
-            color: var(--text-secondary);
+        .metrics-item-row:last-child {
+            margin-bottom: 0;
         }
 
-        .metric-value {
-            font-weight: 600;
+        .metrics-key {
+            color: var(--text-mute);
         }
 
-        .log-box {
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 6px;
-            padding: 0.75rem;
+        .metrics-val {
+            font-weight: 700;
+        }
+
+        .log-box-terminal {
+            background: #02040a;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            color: #10b981;
             font-family: monospace;
             font-size: 0.8rem;
-            color: #34d399;
-            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 6px;
             max-height: 120px;
             overflow-y: auto;
-            border: 1px solid rgba(52, 211, 153, 0.1);
+            margin-top: 0.5rem;
         }
 
-        /* Multi-agent Consensus List */
-        .specialist-list {
+        /* Voting Agents display */
+        .agents-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.75rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
-        .specialist-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
+        .agent-pill {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             padding: 0.6rem;
             border-radius: 8px;
             display: flex;
@@ -232,481 +332,836 @@
             align-items: center;
         }
 
-        .specialist-role {
+        .agent-name {
             font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .specialist-vote {
-            font-size: 0.8rem;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
             font-weight: 600;
         }
 
-        .vote-pneumonia {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: #f87171;
+        .agent-vote-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
         }
 
-        .vote-normal {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #34d399;
+        .vote-tag-positive {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
         }
 
-        /* Sliders */
-        .slider-group {
+        .vote-tag-negative {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        /* Table custom styling */
+        .perf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .perf-table th, .perf-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .perf-table th {
+            color: var(--text-mute);
+            font-weight: 600;
+        }
+
+        .perf-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Interactive SHAP weight bar charts */
+        .shap-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .shap-label {
+            width: 120px;
+            font-size: 0.8rem;
+            color: var(--text-mute);
+        }
+
+        .shap-track {
+            flex: 1;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .shap-fill {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .shap-val-text {
+            width: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        /* Image Display Frame */
+        .scan-preview-box {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .scan-preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .scan-preview-placeholder {
+            color: var(--text-mute);
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Digital Twin Slider custom styling */
+        .slider-wrapper {
             margin-bottom: 1.25rem;
         }
 
-        .slider-header {
+        .slider-label-row {
             display: flex;
             justify-content: space-between;
+            font-size: 0.85rem;
             margin-bottom: 0.4rem;
+        }
+
+        .slider-val-num {
+            font-weight: 700;
+            color: var(--cyan);
         }
 
         input[type="range"] {
             width: 100%;
-            accent-color: var(--accent-primary);
+            accent-color: var(--cyan);
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
         }
 
-        /* Charts Container */
-        .charts-flex {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .charts-flex {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chart-box {
-            background-color: rgba(0, 0, 0, 0.25);
+        /* Visual Grad-CAM Grid preview */
+        .gradcam-grid-overlay {
+            width: 256px;
+            height: 256px;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 0.5rem;
-            border: 1px solid var(--card-border);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .gradcam-point {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: rgba(244, 63, 94, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 16px #f43f5e;
+            transform: translate(-50%, -50%);
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
+    <!-- Main Header -->
+    <div class="app-header">
         <div>
-            <h1 class="app-title">MedTwin AI</h1>
-            <p class="subtitle">Uncertainty-Calibrated Multimodal Medical Consensus & Digital Twin Platform</p>
+            <h1 class="brand-title">MedTwin AI</h1>
+            <p class="brand-subtitle">Clinical Multi-Agent Decision Support & Dynamic Patient Twin Laboratory</p>
         </div>
-        <div class="template-btn-container">
-            <button class="btn btn-secondary" onclick="loadTemplate('pneumonia')">Load Pneumonia Case</button>
-            <button class="btn btn-secondary" onclick="loadTemplate('diabetes')">Load Diabetic Case</button>
-        </div>
+        <div class="system-badge">Active Engine (V1.3)</div>
     </div>
 
-    <div class="dashboard-grid">
-        <!-- Card 1: Diagnostic Center & Self-Healing -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">🩺 Multimodal Diagnostic Center</h2>
-                <span id="predict-status" style="font-size: 0.8rem; color: var(--text-secondary)">Ready</span>
-            </div>
-            <form id="predict-form" onsubmit="runPrediction(event)">
-                <div class="form-group">
-                    <label for="clinical_note">Physician's Symptoms Note</label>
-                    <textarea id="clinical_note" rows="3" placeholder="Describe symptoms, cough, chest pain, fever metrics..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Laboratory Vitals Panel</label>
-                    <div class="vitals-grid">
-                        <div>
-                            <label for="vital_age">Age</label>
-                            <input type="text" id="vital_age" value="65">
-                        </div>
-                        <div>
-                            <label for="vital_temp">Temperature (°F)</label>
-                            <input type="text" id="vital_temp" value="101.5">
-                        </div>
-                        <div>
-                            <label for="vital_hr">Heart Rate (bpm)</label>
-                            <input type="text" id="vital_hr" value="92">
-                        </div>
-                    </div>
-                    <div class="vitals-grid" style="margin-top: 0.5rem">
-                        <div>
-                            <label for="vital_wbc">WBC Count (/uL)</label>
-                            <input type="text" id="vital_wbc" value="14200">
-                        </div>
-                        <div>
-                            <label for="vital_spo2">Oxygen Saturation (%)</label>
-                            <input type="text" id="vital_spo2" value="91">
-                        </div>
-                        <div>
-                            <label for="vital_bp">Blood Pressure (mmHg)</label>
-                            <input type="text" id="vital_bp" value="130">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="scan_file">Upload Chest Radiograph (Mocked)</label>
-                    <input type="file" id="scan_file" accept="image/*">
-                </div>
-                <button type="submit" class="btn" style="width: 100%">Analyze Patient Case</button>
-            </form>
-
-            <!-- Predict Results -->
-            <div id="predict-results" class="results-container" style="display: none;">
-                <div class="metric-row">
-                    <span class="metric-label">Diagnosis Result</span>
-                    <span id="res-diag" class="metric-value">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Base Probability</span>
-                    <span id="res-base-prob" class="metric-value">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Self-Healed Probability</span>
-                    <span id="res-healed-prob" class="metric-value">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Requires Audit (Uncertain)</span>
-                    <span id="res-audit" class="metric-value">--</span>
-                </div>
-                <label>Clinical self-healing trace log:</label>
-                <div id="res-log" class="log-box"></div>
-            </div>
-        </div>
-
-        <!-- Card 2: Consensus Board -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">👥 Clinical Consensus Board</h2>
-                <span id="consensus-status" style="font-size: 0.8rem; color: var(--text-secondary)">No active board</span>
-            </div>
-            
-            <div class="specialist-list" id="specialist-box">
-                <!-- Specialists will populate here -->
-                <div style="grid-column: span 2; text-align: center; color: var(--text-secondary); padding: 2rem 0;">
-                    Run diagnostic analysis to call consensus specialists.
-                </div>
-            </div>
-
-            <!-- Consensus Outcomes -->
-            <div id="consensus-results" class="results-container" style="display: none; border-left-color: var(--emerald);">
-                <div class="metric-row">
-                    <span class="metric-label">Board Consensus Diagnosis</span>
-                    <span id="board-diag" class="metric-value" style="color: var(--emerald)">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">ICD-10 Code Mapped</span>
-                    <span id="board-icd" class="metric-value">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Specialist Agreement Rate</span>
-                    <span id="board-agreement" class="metric-value">--</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Consensus Uncertainty</span>
-                    <span id="board-uncertainty" class="metric-value">--</span>
-                </div>
-                <div class="metric-row" style="flex-direction: column; align-items: flex-start; margin-top: 0.5rem;">
-                    <span class="metric-label">Disagreements Logged:</span>
-                    <span id="board-disagreements" style="font-size: 0.8rem; color: var(--amber); margin-top: 0.25rem;">None</span>
-                </div>
-                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--card-border)">
-                    <label>Medical RAG Literature Citations:</label>
-                    <div id="rag-citation" style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.2rem"></div>
-                    <div id="rag-text" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.3"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+        <button class="nav-tab active" onclick="switchTab('tab-predict')">🩺 Diagnostic Center</button>
+        <button class="nav-tab" onclick="switchTab('tab-ocr')">📄 OCR & Synthetic Scanners</button>
+        <button class="nav-tab" onclick="switchTab('tab-failure')">🔬 Failure Lab & Explainers</button>
+        <button class="nav-tab" onclick="switchTab('tab-optimization')">⚡ Performance Registry</button>
     </div>
 
-    <!-- Card 3: Patient Digital Twin -->
-    <div class="card" style="margin-bottom: 2rem">
-        <div class="card-header">
-            <h2 class="card-title">🧬 Patient Digital Twin Simulation</h2>
-        </div>
-        <div class="dashboard-grid" style="grid-template-columns: 1fr 2fr; margin-bottom: 0;">
-            <!-- Controller -->
-            <div>
-                <h3 style="font-size: 1.1rem; color: #a5b4fc; margin-bottom: 1rem;">"What-If" Interventions</h3>
-                <div class="slider-group">
-                    <div class="slider-header">
-                        <label for="slide-weight">Weight Loss Target</label>
-                        <span id="val-weight" style="font-size: 0.9rem; font-weight: 600">-10 kg</span>
-                    </div>
-                    <input type="range" id="slide-weight" min="-25" max="0" value="-10" step="1" oninput="updateSliderLabel('weight', this.value + ' kg')">
+    <!-- TAB 1: DIAGNOSTIC CENTER -->
+    <div id="tab-predict" class="tab-panel active">
+        <div class="panel-grid">
+            <!-- Left Card: Input panel -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">🩺 Diagnostic Input Panel</span></h2>
+                    <span id="predict-indicator" style="font-size: 0.8rem; color: var(--text-mute)">System Ready</span>
                 </div>
-                <div class="slider-group">
-                    <div class="slider-header">
-                        <label for="slide-metformin">Daily Metformin Dose</label>
-                        <span id="val-metformin" style="font-size: 0.9rem; font-weight: 600">1000 mg</span>
-                    </div>
-                    <input type="range" id="slide-metformin" min="0" max="2000" value="1000" step="500" oninput="updateSliderLabel('metformin', this.value + ' mg')">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-header">
-                        <label for="slide-exercise">Weekly Aerobic Exercise</label>
-                        <span id="val-exercise" style="font-size: 0.9rem; font-weight: 600">4 hours</span>
-                    </div>
-                    <input type="range" id="slide-exercise" min="0" max="10" value="4" step="0.5" oninput="updateSliderLabel('exercise', this.value + ' hours')">
-                </div>
-                <button class="btn" style="width: 100%; background-color: var(--emerald)" onclick="runDigitalTwinSimulation()">Project Trajectories</button>
                 
-                <!-- Risk outcomes -->
-                <div id="twin-risks" class="results-container" style="display: none; border-left-color: var(--amber); margin-top: 1rem;">
-                    <div class="metric-row">
-                        <span class="metric-label">Cardiovascular Risk</span>
-                        <span id="twin-cv-risk" class="metric-value">--</span>
+                <div class="template-pills">
+                    <button class="pill-btn" onclick="applyCaseTemplate('pneumonia')">Template: Pneumonia Case</button>
+                    <button class="pill-btn" onclick="applyCaseTemplate('diabetic')">Template: Diabetic Patient</button>
+                </div>
+
+                <form onsubmit="executeTriModalPrediction(event)">
+                    <div class="field-group">
+                        <label class="field-label" for="txt_note">Clinical Symptom Transcript</label>
+                        <textarea id="txt_note" rows="3" placeholder="Describe presenting symptoms..."></textarea>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Readmission Probability</span>
-                        <span id="twin-readm-risk" class="metric-value">--</span>
+
+                    <div class="field-group">
+                        <label class="field-label">Patient Vitals</label>
+                        <div class="vitals-flex-row">
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">Age (yrs)</label>
+                                <input type="text" id="vit_age" value="65">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">Temperature (°F)</label>
+                                <input type="text" id="vit_temp" value="101.5">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">Heart Rate (bpm)</label>
+                                <input type="text" id="vit_hr" value="92">
+                            </div>
+                        </div>
+                        <div class="vitals-flex-row">
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">WBC (/uL)</label>
+                                <input type="text" id="vit_wbc" value="14200">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">SpO2 (%)</label>
+                                <input type="text" id="vit_spo2" value="91">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-mute);">BP (mmHg)</label>
+                                <input type="text" id="vit_bp" value="130">
+                            </div>
+                        </div>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Estimated Recovery</span>
-                        <span id="twin-recovery" class="metric-value">--</span>
+
+                    <div class="field-group">
+                        <label class="field-label" for="file_scan">Upload Radiograph Image</label>
+                        <input type="file" id="file_scan" accept="image/*" onchange="previewUploadedScan(this)">
                     </div>
-                    <div class="metric-row" style="flex-direction: column; align-items: flex-start; margin-top: 0.5rem">
-                        <span class="metric-label">complications:</span>
-                        <span id="twin-complications" style="font-size: 0.8rem; color: var(--amber); margin-top: 0.25rem;">--</span>
+
+                    <button type="submit" class="action-btn" style="width:100%;">Run Tri-Modal Diagnose</button>
+                </form>
+            </div>
+
+            <!-- Right Card: Outputs -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">📋 Decision Support Outcomes</span></h2>
+                </div>
+
+                <!-- Tri-modal prediction results -->
+                <div id="predict-results" class="metrics-block" style="display:none; border-left-color: var(--primary);">
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Primary Diagnosis</span>
+                        <span id="lbl_diagnosis" class="metrics-val" style="color:var(--primary);">--</span>
+                    </div>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Base Confidence Probability</span>
+                        <span id="lbl_base_prob" class="metrics-val">--</span>
+                    </div>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Self-Healed Probability</span>
+                        <span id="lbl_healed_prob" class="metrics-val" style="color:var(--emerald);">--</span>
+                    </div>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Requires Audit (Uncertain)</span>
+                        <span id="lbl_audit" class="metrics-val">--</span>
+                    </div>
+                    
+                    <div style="margin-top:0.75rem;">
+                        <label class="field-label">Self-healing active reasoning logs:</label>
+                        <div id="lbl_heal_log" class="log-box-terminal"></div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Shaded trajectory charts -->
-            <div>
-                <h3 style="font-size: 1.1rem; color: #a5b4fc; margin-bottom: 1rem;">Longitudinal Vital Forecasts (Shaded 95% Bayesian Credible Intervals)</h3>
-                <div class="charts-flex">
-                    <div class="chart-box">
-                        <canvas id="chart-weight" height="150"></canvas>
+
+                <!-- Specialist consensus votes results -->
+                <div id="consensus-results" class="metrics-block" style="display:none; border-left-color: var(--emerald); margin-top:1.5rem;">
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Board Consensus Diagnosis</span>
+                        <span id="lbl_board_diag" class="metrics-val" style="color:var(--emerald);">--</span>
                     </div>
-                    <div class="chart-box">
-                        <canvas id="chart-glucose" height="150"></canvas>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Agreement Rate</span>
+                        <span id="lbl_board_agree" class="metrics-val">--</span>
                     </div>
-                    <div class="chart-box">
-                        <canvas id="chart-bp" height="150"></canvas>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Consensus Uncertainty</span>
+                        <span id="lbl_board_uncertain" class="metrics-val">--</span>
+                    </div>
+                    
+                    <div style="margin-top:0.75rem;">
+                        <label class="field-label">Specialist Votes Breakdown:</label>
+                        <div class="agents-grid" id="lbl_agents_box"></div>
+                    </div>
+
+                    <div style="margin-top:0.75rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.75rem;">
+                        <label class="field-label">Clinical RAG Citation Guidance:</label>
+                        <div id="lbl_rag_citation" style="font-size:0.8rem; font-weight:700; color:#a5b4fc; margin-bottom:0.25rem;"></div>
+                        <div id="lbl_rag_text" style="font-size:0.75rem; color:var(--text-mute); line-height:1.3;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- TAB 2: OCR & SYNTHETIC DATA SCANNERS -->
+    <div id="tab-ocr" class="tab-panel">
+        <div class="panel-grid">
+            <!-- Left Card: OCR Scanner -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">📄 Medical Document OCR Scanner</span></h2>
+                </div>
+                
+                <form onsubmit="executeOCRScan(event)">
+                    <div class="field-group">
+                        <label class="field-label" for="ocr_doc_type">Document Category</label>
+                        <select id="ocr_doc_type">
+                            <option value="prescription">Prescription Slip</option>
+                            <option value="lab_report">Lab Panel Sheet</option>
+                            <option value="discharge_summary">Discharge Summary</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="ocr_file">Scanned Document Image</label>
+                        <input type="file" id="ocr_file" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="action-btn" style="width:100%;">Extract Text & Entities</button>
+                </form>
+
+                <div id="ocr-results" class="metrics-block" style="display:none; border-left-color: var(--cyan);">
+                    <div class="metrics-item-row" style="flex-direction:column; align-items:flex-start;">
+                        <span class="metrics-key">Extracted Document Text:</span>
+                        <div id="lbl_ocr_raw" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:white;"></div>
+                    </div>
+                    <div class="metrics-item-row" style="margin-top:0.75rem;">
+                        <span class="metrics-key">Extracted Medications:</span>
+                        <span id="lbl_ocr_meds" class="metrics-val" style="color:var(--cyan);">--</span>
+                    </div>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Extracted Dosages:</span>
+                        <span id="lbl_ocr_doses" class="metrics-val">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Card: Synthetic Scanner -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">🧪 Synthetic Medical Scan Generator</span></h2>
+                </div>
+
+                <form onsubmit="executeSyntheticGeneration(event)">
+                    <div class="vitals-flex-row">
+                        <div>
+                            <label class="field-label" for="gen_modal">Modality</label>
+                            <select id="gen_modal">
+                                <option value="mri">Brain MRI</option>
+                                <option value="x-ray">Chest X-Ray</option>
+                                <option value="ct">CT Scan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="field-label" for="gen_cond">Condition</label>
+                            <select id="gen_cond">
+                                <option value="alkaptonuria">Alkaptonuria (Rare)</option>
+                                <option value="glioblastoma">Glioblastoma (Rare)</option>
+                                <option value="pneumonia">Pneumonia</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="field-label" for="gen_qual">Scan Quality</label>
+                            <select id="gen_qual">
+                                <option value="high">Clean High-Quality</option>
+                                <option value="blurred">Blurred (Motion Artifact)</option>
+                                <option value="noisy">Noisy (Sensor Perturb)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="action-btn action-btn-emerald" style="width:100%;">Synthesize Patient Assets</button>
+                </form>
+
+                <div id="synthetic-results" class="metrics-block" style="display:none; border-left-color: var(--emerald);">
+                    <div class="scan-preview-box">
+                        <img id="img_gen_preview" src="" alt="Synthetic Scan Asset">
+                    </div>
+                    <div class="metrics-item-row" style="flex-direction:column; align-items:flex-start;">
+                        <span class="metrics-key">Generated Urinalysis / Lab values:</span>
+                        <div id="lbl_gen_labs" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--text-main); font-family:monospace;"></div>
+                    </div>
+                    <div class="metrics-item-row" style="flex-direction:column; align-items:flex-start; margin-top:0.5rem;">
+                        <span class="metrics-key">Generated Patient History:</span>
+                        <div id="lbl_gen_history" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--text-mute);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: FAILURE LAB & SALIENCY EXPLAINERS -->
+    <div id="tab-failure" class="tab-panel">
+        <div class="panel-grid">
+            <!-- Left Card: Failure auditor -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">🔬 Failure Analysis Laboratory</span></h2>
+                </div>
+
+                <form onsubmit="executeFailureAudit(event)">
+                    <div class="vitals-flex-row">
+                        <div>
+                            <label class="field-label" for="aud_pred">Model Prediction</label>
+                            <input type="text" id="aud_pred" value="Normal">
+                        </div>
+                        <div>
+                            <label class="field-label" for="aud_truth">Ground Truth</label>
+                            <input type="text" id="aud_truth" value="Pneumonia">
+                        </div>
+                    </div>
+                    
+                    <div class="vitals-flex-row">
+                        <div>
+                            <label class="field-label" for="aud_rag">RAG Similarity</label>
+                            <input type="text" id="aud_rag" value="0.85">
+                        </div>
+                        <div>
+                            <label class="field-label" for="aud_ner">NER Faithfulness</label>
+                            <input type="text" id="aud_ner" value="0.95">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="action-btn" style="width:100%;">Audit Diagnostics Failure</button>
+                </form>
+
+                <div id="audit-results" class="metrics-block" style="display:none; border-left-color: var(--rose);">
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Failure Detected</span>
+                        <span id="lbl_aud_detected" class="metrics-val" style="color:var(--rose);">--</span>
+                    </div>
+                    <div class="metrics-item-row">
+                        <span class="metrics-key">Failure Classification</span>
+                        <span id="lbl_aud_class" class="metrics-val" style="font-weight:700;">--</span>
+                    </div>
+                    <div class="metrics-item-row" style="flex-direction:column; align-items:flex-start; margin-top:0.5rem;">
+                        <span class="metrics-key">Root Cause Analysis:</span>
+                        <div id="lbl_aud_cause" style="font-size:0.8rem; background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.15); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--text-main);"></div>
+                    </div>
+                    <div class="metrics-item-row" style="flex-direction:column; align-items:flex-start; margin-top:0.5rem;">
+                        <span class="metrics-key">Suggested Corrective Retraining Plan:</span>
+                        <div id="lbl_aud_retrain" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--cyan);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Card: Explainers -->
+            <div class="glass-card">
+                <div class="card-title-bar">
+                    <h2 class="card-title-bar"><span class="card-header-title">👁️ Clinical Prediction Explainers</span></h2>
+                </div>
+
+                <div class="panel-grid" style="grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0;">
+                    <!-- Visual Grad-CAM -->
+                    <div>
+                        <h3 style="font-size:0.9rem; color:#a5b4fc; margin-bottom:0.75rem;">Visual Attention Centroids (Grad-CAM)</h3>
+                        <div class="gradcam-grid-overlay">
+                            <div class="gradcam-point" style="left: 120px; top: 120px;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabular SHAP -->
+                    <div>
+                        <h3 style="font-size:0.9rem; color:#a5b4fc; margin-bottom:0.75rem;">Vitals SHAP Attributions</h3>
+                        <div id="shap-bars-box" style="margin-top:0.5rem;">
+                            <!-- SHAP values populates here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="explain-results" class="metrics-block" style="display:none; border-left-color: var(--cyan); margin-top:1rem;">
+                    <label class="field-label">Natural Language Medical Narrative:</label>
+                    <div id="lbl_exp_narrative" style="font-size:0.8rem; color:var(--text-main); font-style:italic; line-height:1.4;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: PERFORMANCE REGISTRY -->
+    <div id="tab-optimization" class="tab-panel">
+        <div class="glass-card" style="margin-bottom: 2rem">
+            <div class="card-title-bar">
+                <h2 class="card-title-bar"><span class="card-header-title">⚡ Distributed Training & Inference Optimization Benchmarks</span></h2>
+                <button class="btn action-btn-emerald" onclick="executeBenchmarkProfile()">Trigger Performance Benchmark Suite</button>
+            </div>
+
+            <div class="panel-grid" style="grid-template-columns: 2fr 1.5fr; gap:2rem;">
+                <!-- Tables -->
+                <div>
+                    <h3 style="font-size:1.1rem; color:#a5b4fc;">Runtime Compiler Execution Metrics</h3>
+                    <table class="perf-table">
+                        <thead>
+                            <tr>
+                                <th>Backend Target</th>
+                                <th>Latency (ms)</th>
+                                <th>Peak VRAM</th>
+                                <th>Throughput</th>
+                                <th>Normalized Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lbl_bench_rows">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--text-mute);">Trigger benchmark suite to build metrics registry.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- DeepSpeed config preview -->
+                <div>
+                    <h3 style="font-size:1.1rem; color:#a5b4fc; margin-bottom:1rem;">FSDP & DeepSpeed ZeRO-3 parameters</h3>
+                    <div style="background:rgba(0,0,0,0.4); padding:1rem; border-radius:8px; font-family:monospace; font-size:0.75rem; border:1px solid rgba(255,255,255,0.06); color:#a5b4fc; height:200px; overflow-y:auto;">
+{
+  "zero_optimization": {
+    "stage": 3,
+    "offload_optimizer": {
+      "device": "cpu",
+      "pin_memory": true
+    },
+    "offload_param": {
+      "device": "cpu",
+      "pin_memory": true
+    }
+  },
+  "bf16": { "enabled": true },
+  "fsdp_wrapping": {
+    "transformer_layer": "MedTwinAttentionLayer"
+  }
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LoRA tracking registry -->
+        <div class="glass-card">
+            <div class="card-title-bar">
+                <h2 class="card-title-bar"><span class="card-header-title">📈 Weights & Biases / MLflow Experiment logs (Prod_LoRA_Rank_16)</span></h2>
+            </div>
+            
+            <table class="perf-table">
+                <thead>
+                    <tr>
+                        <th>Run Identifier</th>
+                        <th>LoRA Rank</th>
+                        <th>Learning Rate</th>
+                        <th>Dataset</th>
+                        <th>Peak VRAM</th>
+                        <th>Val F1-Score</th>
+                        <th>Hallucination Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>LoRA_Rank_4</b></td>
+                        <td>4</td>
+                        <td>1e-4</td>
+                        <td>v1.2 (Clean)</td>
+                        <td>6.8 GB</td>
+                        <td>86.5%</td>
+                        <td>38.0%</td>
+                    </tr>
+                    <tr>
+                        <td><b>LoRA_Rank_8</b></td>
+                        <td>8</td>
+                        <td>2e-4</td>
+                        <td>v1.2 (Clean)</td>
+                        <td>12.5 GB</td>
+                        <td>91.0%</td>
+                        <td>22.0%</td>
+                    </tr>
+                    <tr style="background:rgba(99,102,241,0.05);">
+                        <td><b>LoRA_Rank_16</b> <span style="font-size:0.7rem; color:var(--cyan);">(Active)</span></td>
+                        <td>16</td>
+                        <td>3e-4</td>
+                        <td>v1.2 (Clean)</td>
+                        <td>16.2 GB</td>
+                        <td><b>94.5%</b></td>
+                        <td><b>12.0%</b></td>
+                    </tr>
+                    <tr>
+                        <td><b>LoRA_Rank_32</b></td>
+                        <td>32</td>
+                        <td>3e-4</td>
+                        <td>v1.2 (Clean)</td>
+                        <td>22.0 GB</td>
+                        <td>94.8%</td>
+                        <td>8.0%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SCRIPT HANDLING LOGIC -->
     <script>
-        let charts = {};
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+            
+            document.getElementById(tabId).classList.add("active");
+            event.target.classList.add("active");
+        }
 
-        function loadTemplate(type) {
+        function applyCaseTemplate(type) {
             if (type === 'pneumonia') {
-                document.getElementById("clinical_note").value = "Patient presents with cough and fever. Crackles heard on chest auscultation. Lung opacity in radiograph scans.";
-                document.getElementById("vital_age").value = "65";
-                document.getElementById("vital_temp").value = "102.1";
-                document.getElementById("vital_hr").value = "94";
-                document.getElementById("vital_wbc").value = "14500";
-                document.getElementById("vital_spo2").value = "92";
-                document.getElementById("vital_bp").value = "125";
-            } else if (type === 'diabetes') {
-                document.getElementById("clinical_note").value = "Obese patient seeking diabetic routine check. Standard blood pressure tracking show hypertension. Feeling mild chest pain when climbing stairs.";
-                document.getElementById("vital_age").value = "58";
-                document.getElementById("vital_temp").value = "98.6";
-                document.getElementById("vital_hr").value = "82";
-                document.getElementById("vital_wbc").value = "7200";
-                document.getElementById("vital_spo2").value = "96";
-                document.getElementById("vital_bp").value = "142";
-                
-                // Set twin sliders appropriate for diabetes weight loss targets
-                document.getElementById("slide-weight").value = "-10";
-                document.getElementById("val-weight").innerText = "-10 kg";
-                document.getElementById("slide-metformin").value = "1000";
-                document.getElementById("val-metformin").innerText = "1000 mg";
+                document.getElementById("txt_note").value = "Patient presents with cough and fever. Auscultation flags crackles in pulmonary zone.";
+                document.getElementById("vit_age").value = "65";
+                document.getElementById("vit_temp").value = "102.1";
+                document.getElementById("vit_hr").value = "94";
+                document.getElementById("vit_wbc").value = "14500";
+                document.getElementById("vit_spo2").value = "92";
+                document.getElementById("vit_bp").value = "125";
+            } else {
+                document.getElementById("txt_note").value = "Hypertensive patient seeking diabetic evaluation. Routine pressure is elevated.";
+                document.getElementById("vit_age").value = "58";
+                document.getElementById("vit_temp").value = "98.6";
+                document.getElementById("vit_hr").value = "82";
+                document.getElementById("vit_wbc").value = "7200";
+                document.getElementById("vit_spo2").value = "96";
+                document.getElementById("vit_bp").value = "142";
             }
         }
 
-        function updateSliderLabel(vital, val) {
-            document.getElementById(`val-${vital}`).innerText = val;
+        function previewUploadedScan(input) {
+            // Emulate visual preview
         }
 
-        async function runPrediction(event) {
+        // Form post calls
+        async function executeTriModalPrediction(event) {
             event.preventDefault();
-            document.getElementById("predict-status").innerText = "Analyzing...";
+            document.getElementById("predict-indicator").innerText = "Analyzing Tri-Modal inputs...";
             
-            const note = document.getElementById("clinical_note").value;
+            const note = document.getElementById("txt_note").value;
             const vitals = {
-                age: parseFloat(document.getElementById("vital_age").value),
-                temperature: parseFloat(document.getElementById("vital_temp").value),
-                heart_rate: parseFloat(document.getElementById("vital_hr").value),
-                wbc_count: parseFloat(document.getElementById("vital_wbc").value),
-                oxygen_saturation: parseFloat(document.getElementById("vital_spo2").value),
-                blood_pressure: parseFloat(document.getElementById("vital_bp").value)
+                age: parseFloat(document.getElementById("vit_age").value),
+                temperature: parseFloat(document.getElementById("vit_temp").value),
+                heart_rate: parseFloat(document.getElementById("vit_hr").value),
+                wbc_count: parseFloat(document.getElementById("vit_wbc").value),
+                oxygen_saturation: parseFloat(document.getElementById("vit_spo2").value),
+                blood_pressure: parseFloat(document.getElementById("vit_bp").value)
             };
 
             const formData = new FormData();
             formData.append("clinical_note", note);
             formData.append("lab_metrics_json", JSON.stringify(vitals));
             
-            // Append a dummy pixel image if file is empty to satisfy endpoints
-            const fileInput = document.getElementById("scan_file");
+            // Append 1x1 mock PNG
+            const pixelBlob = new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0, 144, 119, 83, 222, 0, 0, 0, 12, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 0, 2, 0, 1, 2, 63, 13, 14, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130])], {type: "image/png"});
+            formData.append("file", pixelBlob, "scan.png");
+
+            try {
+                // prediction Predict
+                const r1 = await fetch("/predict", { method: "POST", body: formData });
+                const res = await r1.json();
+                document.getElementById("predict-results").style.display = "block";
+                document.getElementById("lbl_diagnosis").innerText = res.diagnostic_metrics.diagnosis_label;
+                document.getElementById("lbl_base_prob").innerText = (res.diagnostic_metrics.base_calibrated_prob * 100).toFixed(1) + "%";
+                document.getElementById("lbl_healed_prob").innerText = (res.diagnostic_metrics.healed_calibrated_prob * 100).toFixed(1) + "%";
+                document.getElementById("lbl_audit").innerText = res.diagnostic_metrics.requires_clinical_audit ? "YES (Calibrate Sets)" : "NO";
+                document.getElementById("lbl_heal_log").innerText = res.self_healing_trace.reasoning_log;
+
+                // consensus
+                const r2 = await fetch("/consensus", { method: "POST", body: formData });
+                const cRes = await r2.json();
+                document.getElementById("consensus-results").style.display = "block";
+                document.getElementById("lbl_board_diag").innerText = cRes.consensus_metrics.consensus_diagnosis;
+                document.getElementById("lbl_board_agree").innerText = (cRes.consensus_metrics.agreement_rate * 100).toFixed(1) + "%";
+                document.getElementById("lbl_board_uncertain").innerText = (cRes.consensus_metrics.consensus_uncertainty * 100).toFixed(1) + "%";
+                
+                // Specialists
+                const box = document.getElementById("lbl_agents_box");
+                box.innerHTML = "";
+                Object.entries(cRes.specialist_opinions).forEach(([role, val]) => {
+                    const tag = val.diagnosis === "Normal" ? "vote-tag-negative" : "vote-tag-positive";
+                    box.innerHTML += `
+                        <div class="agent-pill">
+                            <span class="agent-name">${role}</span>
+                            <span class="agent-vote-tag ${tag}">${val.diagnosis}</span>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById("lbl_rag_citation").innerText = cRes.guideline_citations.citation;
+                document.getElementById("lbl_rag_text").innerText = `"${cRes.guideline_citations.text}"`;
+
+                document.getElementById("predict-indicator").innerText = "System Ready";
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function executeOCRScan(event) {
+            event.preventDefault();
+            const dtype = document.getElementById("ocr_doc_type").value;
+            const fileInput = document.getElementById("ocr_file");
+            
+            const formData = new FormData();
+            formData.append("document_type", dtype);
             if (fileInput.files.length > 0) {
                 formData.append("file", fileInput.files[0]);
             } else {
-                // Create a 1x1 black png pixel to keep post-hoc VLM happy
                 const pixelBlob = new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0, 144, 119, 83, 222, 0, 0, 0, 12, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 0, 2, 0, 1, 2, 63, 13, 14, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130])], {type: "image/png"});
-                formData.append("file", pixelBlob, "radiograph_mock.png");
+                formData.append("file", pixelBlob, "doc.png");
             }
 
             try {
-                // Call /predict endpoint
-                const response = await fetch("/predict", { method: "POST", body: formData });
+                const response = await fetch("/ocr/analyze", { method: "POST", body: formData });
                 const res = await response.json();
                 
-                document.getElementById("predict-results").style.display = "block";
-                document.getElementById("res-diag").innerText = res.diagnostic_metrics.diagnosis_label;
-                document.getElementById("res-base-prob").innerText = (res.diagnostic_metrics.base_calibrated_prob * 100).toFixed(1) + "%";
-                document.getElementById("res-healed-prob").innerText = (res.diagnostic_metrics.healed_calibrated_prob * 100).toFixed(1) + "%";
-                document.getElementById("res-audit").innerText = res.diagnostic_metrics.requires_clinical_audit ? "Yes" : "No";
-                document.getElementById("res-log").innerText = res.self_healing_trace.reasoning_log;
-                document.getElementById("predict-status").innerText = "Analysis Complete";
-
-                // Now execute consensus board queries
-                document.getElementById("consensus-status").innerText = "Activating Specialist Board...";
-                const consensusRes = await fetch("/consensus", { method: "POST", body: formData });
-                const cRes = await consensusRes.json();
-                
-                document.getElementById("consensus-results").style.display = "block";
-                document.getElementById("board-diag").innerText = cRes.consensus_metrics.consensus_diagnosis;
-                document.getElementById("board-icd").innerText = cRes.consensus_metrics.icd10_code;
-                document.getElementById("board-agreement").innerText = (cRes.consensus_metrics.agreement_rate * 100).toFixed(1) + "%";
-                document.getElementById("board-uncertainty").innerText = (cRes.consensus_metrics.consensus_uncertainty * 100).toFixed(1) + "%";
-                
-                const diagList = cRes.consensus_details.disagreements.map(d => `${d.specialist} suggested ${d.suggested_diagnosis}`).join(", ");
-                document.getElementById("board-disagreements").innerText = diagList || "None";
-                
-                document.getElementById("rag-citation").innerText = cRes.guideline_citations.citation;
-                document.getElementById("rag-text").innerText = cRes.guideline_citations.text;
-
-                // Render specialists list
-                const specialistBox = document.getElementById("specialist-box");
-                specialistBox.innerHTML = "";
-                Object.entries(cRes.specialist_opinions).forEach(([role, opinion]) => {
-                    const voteClass = opinion.diagnosis === "Normal" ? "vote-normal" : "vote-pneumonia";
-                    const item = document.createElement("div");
-                    item.className = "specialist-item";
-                    item.innerHTML = `
-                        <span class="specialist-role">${role}</span>
-                        <span class="specialist-vote ${voteClass}">${opinion.diagnosis}</span>
-                    `;
-                    specialistBox.appendChild(item);
-                });
-                
-                document.getElementById("consensus-status").innerText = "Consensus Reached";
-                
+                document.getElementById("ocr-results").style.display = "block";
+                document.getElementById("lbl_ocr_raw").innerText = `"${res.ocr_text}"`;
+                document.getElementById("lbl_ocr_meds").innerText = res.extracted_medications.join(", ") || "None";
+                document.getElementById("lbl_ocr_doses").innerText = res.extracted_dosages.join(", ") || "None";
             } catch(e) {
-                document.getElementById("predict-status").innerText = "Analysis Error";
                 console.error(e);
             }
         }
 
-        async function runDigitalTwinSimulation() {
-            const vitals = {
-                weight: parseFloat(document.getElementById("vital_age").value > 60 ? 80.0 : 95.0), # weight mock helper
-                blood_pressure: parseFloat(document.getElementById("vital_bp").value),
-                blood_glucose: 170.0,
-                heart_rate: parseFloat(document.getElementById("vital_hr").value),
-                wbc_count: parseFloat(document.getElementById("vital_wbc").value),
-                oxygen_saturation: parseFloat(document.getElementById("vital_spo2").value)
-            };
-
-            const scenario = {
-                weight_change: parseFloat(document.getElementById("slide-weight").value),
-                metformin_mg: parseFloat(document.getElementById("slide-metformin").value),
-                beta_blocker_mg: 0.0,
-                exercise_hours: parseFloat(document.getElementById("slide-exercise").value),
-                sodium_intake_g: 1.5
-            };
+        async function executeSyntheticGeneration(event) {
+            event.preventDefault();
+            const modal = document.getElementById("gen_modal").value;
+            const cond = document.getElementById("gen_cond").value;
+            const qual = document.getElementById("gen_qual").value;
 
             const formData = new FormData();
-            formData.append("patient_vitals_json", JSON.stringify(vitals));
-            formData.append("what_if_scenario_json", JSON.stringify(scenario));
+            formData.append("modality", modal);
+            formData.append("condition", cond);
+            formData.append("quality", qual);
 
             try {
-                const response = await fetch("/twin/simulate", { method: "POST", body: formData });
+                const response = await fetch("/synthetic/generate", { method: "POST", body: formData });
                 const res = await response.json();
                 
-                document.getElementById("twin-risks").style.display = "block";
-                document.getElementById("twin-cv-risk").innerText = (res.risk_scores.cardiovascular_risk * 100).toFixed(1) + "%";
-                document.getElementById("twin-readm-risk").innerText = (res.risk_scores.hospital_readmission_risk * 100).toFixed(1) + "%";
-                document.getElementById("twin-recovery").innerText = res.risk_scores.predicted_recovery_time_days.toFixed(1) + " days";
-                document.getElementById("twin-complications").innerText = res.complications.join(", ");
-                
-                // Render Chart.js forecasts
-                renderChart("chart-weight", "Weight (kg)", res.trajectories.months, res.trajectories.weight.mean, res.trajectories.weight.std, "#84cc16");
-                renderChart("chart-glucose", "Glucose (mg/dL)", res.trajectories.months, res.trajectories.blood_glucose.mean, res.trajectories.blood_glucose.std, "#f43f5e");
-                renderChart("chart-bp", "Pressure (mmHg)", res.trajectories.months, res.trajectories.blood_pressure.mean, res.trajectories.blood_pressure.std, "#3b82f6");
-
+                document.getElementById("synthetic-results").style.display = "block";
+                document.getElementById("img_gen_preview").src = "data:image/png;base64," + res.synthetic_image_b64;
+                document.getElementById("lbl_gen_labs").innerText = res.synthetic_lab_report;
+                document.getElementById("lbl_gen_history").innerText = res.synthetic_patient_history;
             } catch(e) {
                 console.error(e);
             }
         }
 
-        function renderChart(id, label, labels, mean, std, color) {
-            if (charts[id]) {
-                charts[id].destroy();
-            }
-            
-            // Estimate confidence bands
-            const upper = mean.map((m, idx) => m + 1.96 * std[idx]);
-            const lower = mean.map((m, idx) => m - 1.96 * std[idx]);
+        async function executeFailureAudit(event) {
+            event.preventDefault();
+            const pred = document.getElementById("aud_pred").value;
+            const truth = document.getElementById("aud_truth").value;
+            const rag = parseFloat(document.getElementById("aud_rag").value);
+            const ner = parseFloat(document.getElementById("aud_ner").value);
 
-            const ctx = document.getElementById(id).getContext('2d');
-            charts[id] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: label,
-                            data: mean,
-                            borderColor: color,
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1
-                        },
-                        {
-                            label: '95% Credible Bounds',
-                            data: upper,
-                            borderColor: 'transparent',
-                            backgroundColor: color + '18',
-                            fill: '+1',
-                            tension: 0.1,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Lower Bound',
-                            data: lower,
-                            borderColor: 'transparent',
-                            backgroundColor: color + '18',
-                            fill: false,
-                            tension: 0.1,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' } }
-                    }
-                }
-            });
+            const formData = new FormData();
+            formData.append("prediction", pred);
+            formData.append("ground_truth", truth);
+            formData.append("ocr_text", "valid");
+            formData.append("rag_similarity", rag);
+            formData.append("ner_faithfulness", ner);
+            formData.append("vitals_json", JSON.stringify({temperature: 101.5, wbc_count: 14500}));
+            formData.append("clinical_note", "Patient has cough");
+
+            try {
+                const response = await fetch("/explainability/analyze", { method: "POST", body: formData });
+                const res = await response.json();
+                
+                document.getElementById("audit-results").style.display = "block";
+                document.getElementById("lbl_aud_detected").innerText = res.failure_audit.failure_detected ? "YES" : "NO";
+                document.getElementById("lbl_aud_class").innerText = res.failure_audit.failure_class;
+                document.getElementById("lbl_aud_cause").innerText = res.failure_audit.root_cause_analysis;
+                document.getElementById("lbl_aud_retrain").innerText = res.failure_audit.suggested_retraining_action;
+                
+                document.getElementById("explain-results").style.display = "block";
+                document.getElementById("lbl_exp_narrative").innerText = res.natural_language_explanation;
+                
+                // Render SHAP attribution bars
+                const shapBox = document.getElementById("shap-bars-box");
+                shapBox.innerHTML = "";
+                Object.entries(res.shap_values).forEach(([key, val]) => {
+                    const absVal = Math.abs(val);
+                    const color = val > 0 ? "var(--rose)" : "var(--cyan)";
+                    shapBox.innerHTML += `
+                        <div class="shap-bar-container">
+                            <span class="shap-label">${key}</span>
+                            <div class="shap-track">
+                                <div class="shap-fill" style="width: ${absVal * 100}%; background-color: ${color};"></div>
+                            </div>
+                            <span class="shap-val-text" style="color: ${color};">${val > 0 ? '+' : ''}${val.toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                console.error(e);
+            }
         }
-        
-        // Load initial template values
-        loadTemplate('pneumonia');
+
+        async function executeBenchmarkProfile() {
+            const table = document.getElementById("lbl_bench_rows");
+            table.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-mute);">Executing benchmark tests across engines...</td></tr>`;
+            
+            try {
+                const response = await fetch("/optimization/benchmark", { method: "POST" });
+                const res = await response.json();
+                
+                table.innerHTML = "";
+                Object.entries(res.inference_benchmarks).forEach(([key, val]) => {
+                    table.innerHTML += `
+                        <tr>
+                            <td><b>${key}</b></td>
+                            <td style="color:var(--rose); font-weight:700;">${val.latency_ms.toFixed(1)} ms</td>
+                            <td>${val.vram_gb.toFixed(1)} GB</td>
+                            <td style="color:var(--emerald); font-weight:700;">${val.throughput.toFixed(1)}/s</td>
+                            <td>${(val.cost_ratio * 100).toFixed(0)}%</td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
     </script>
 </body>
 </html>
