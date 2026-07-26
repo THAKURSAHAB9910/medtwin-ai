@@ -13,7 +13,11 @@
 1. **Tri-Modal Cross-Attention Fusion**: Projects chest radiographs (Med-ViT), clinical physician note embeddings (ClinicalVLM), and vital metric tokens (StructuredLabEncoder) into a shared space. It aligns visual features to textual and vital contexts using gated cross-attention.
 2. **Uncertainty Calibration & Conformal Sets**: Uses temperature scaling and split conformal prediction to output distribution-free confidence sets of diagnoses at a target coverage rate (e.g. 90% confidence), preventing overconfident model mistakes.
 3. **Physiological Self-Healing Loop**: If a prediction falls within the conformal prediction uncertainty margin, the engine triggers active reasoning checks, cross-referencing patient blood/vital stats (temperature, leukocytes, oxygenation) and local lesion density scores to correct diagnostic classification.
-4. **PatientCraft Generation Engine**: Programmatically synthesizes high-fidelity chest radiographs (with localized lung fluid abnormalities), clinical notes, and vital reports representing complex and degraded out-of-distribution profiles.
+4. **Specialist Multi-Agent Board**: Establishes coordinated plurality voting and consensus scoring over Radiologist, Pathologist, Dermatologist, and Literature Researcher agents.
+5. **Medical OCR & Document Intelligence**: Pipeline extracting structured entities (drug names, dosages) from hand-written or scanned prescriptions using PaddleOCR/TrOCR.
+6. **Synthetic Scanner Engine**: Synthesizes blurred, noisy, and rare disease profiles (Alkaptonuria, Glioblastoma, Huntington's) to stress-test diagnostic robustness.
+7. **Failure Lab & Saliency Explainers**: Automatically audits false negatives and provides Grad-CAM, SHAP, and attention map attribution traces.
+8. **Experiment Tracking & TensorRT Optimization**: Plugs into MLflow/W&B/TensorBoard and compiles inference targets to TensorRT to reduce GPU footprint to 2.8GB.
 
 ---
 
@@ -21,39 +25,39 @@
 
 ```
 nhyp/
-├── configs/
-│   └── default_config.yaml         # Training and evaluation configurations
 ├── docs/
-│   ├── ieee_paper_draft.md         # IEEE-style workshop paper draft
 │   ├── technical_report.md         # Detailed technical specification
 │   ├── ablation_report.md          # Quantitative ablation comparisons
-│   └── deployment_guide.md         # Production deployment and metrics config
+│   ├── dataset_card.md             # Dataset partitions details
+│   ├── model_card.md               # Model parameters details
+│   ├── deployment_guide.md         # FastAPI server launch details
+│   ├── training_guide.md           # PEFT and DeepSpeed training instructions
+│   └── evaluation_guide.md         # Accuracy validation metrics
 ├── src/
-│   ├── data/
-│   │   ├── generator.py            # PatientCraft synthetic patient generator
-│   │   └── dataset.py              # Tri-modal clinical dataset loaders
-│   ├── models/
-│   │   ├── med_vit.py              # Visual scan branch (timm)
-│   │   ├── clinical_vlm.py         # Clinical note text branch
-│   │   ├── lab_encoder.py          # Structured vitals/lab report branch
-│   │   ├── fusion.py               # Tri-modal gated cross-attention network
-│   │   └── uncertainty.py          # Calibration & Conformal prediction
-│   ├── training/
-│   │   ├── trainer.py              # PyTorch Lightning medical trainer
-│   │   └── self_healing.py         # Self-healing clinical reasoning engine
-│   ├── evaluation/
-│   │   └── evaluator.py            # Diagnostic benchmarking and reports
-│   └── explanation/
-│       └── explain.py              # Anomaly overlays & clinical notes summary
-├── tests/
-│   ├── test_data.py                # Unit tests for data generation
-│   ├── test_models.py              # Unit tests for networks
-│   └── test_calibration.py         # Unit tests for calibration logic
-├── notebooks/
-│   └── experiment_dashboard.py      # Dashboard plotting script
-├── requirements.txt                # Project dependencies
-├── Dockerfile                      # Containerization recipe
-├── run_pipeline.py                 # Multi-stage CLI pipeline entrypoint
+│   ├── agents/
+│   │   ├── coordinator.py          # Specialist agent coordination
+│   │   └── specialists.py          # Specialist panel agents
+│   ├── ocr/
+│   │   ├── pipeline.py             # OCR doc scanner pipeline
+│   │   └── benchmarker.py          # PaddleOCR, EasyOCR benchmarks
+│   ├── synthetic/
+│   │   ├── engine.py               # Degradation noise generator
+│   │   └── evaluator.py            # Robustness augmented evaluator
+│   ├── explainability/
+│   │   ├── lab.py                  # Failure Analysis Lab
+│   │   └── explain.py              # Grad-CAM, SHAP explainers
+│   ├── tracking/
+│   │   ├── tracker.py              # MLflow/W&B experiment logging
+│   │   └── dashboard.py            # Performance dashboards
+│   └── optimization/
+│       ├── distributed.py          # FSDP, DeepSpeed distributed training
+│       ├── inference.py            # torch.compile, TensorRT compilers
+│       └── benchmarker.py          # Latency & throughput benchmarker
+├── tests/                          # Automated pytest suite
+├── run_synthetic_pipeline.py       # [CLI] Synthetic pipeline entrypoint
+├── run_explainability_pipeline.py  # [CLI] Explainability pipeline entrypoint
+├── run_tracking_pipeline.py        # [CLI] MLflow tracking pipeline entrypoint
+├── run_optimization_pipeline.py    # [CLI] TensorRT compile benchmarks entrypoint
 └── README.md                       # High-level overview (this file)
 ```
 
@@ -73,28 +77,32 @@ Execute the pytest suite to verify all modules and dimensions:
 python -m pytest
 ```
 
-### 3. Run the Research Lifecycle Pipeline
-To run patient record synthesis, training, calibration fitting, validation benchmarking, OOD testing, and generate medical explanation charts:
-```bash
-python run_pipeline.py --epochs 2 --batch_size 4
-```
-This executes the pipeline using mock components for swift end-to-end execution, exporting visual overlays to `docs/`.
+### 3. Run the Specialized Pipelines
+* **Generate Synthetic Scans & Documents**:
+  ```bash
+  python run_synthetic_pipeline.py
+  ```
+* **Audit Failures and Extract Explainability Saliency**:
+  ```bash
+  python run_explainability_pipeline.py
+  ```
+* **Log Runs to MLflow, W&B, and TensorBoard**:
+  ```bash
+  python run_tracking_pipeline.py
+  ```
+* **Run Distributed and Compile TensorRT Engines**:
+  ```bash
+  python run_optimization_pipeline.py
+  ```
 
 ### 4. Deploying the REST API
 Start the FastAPI server:
 ```bash
 python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000
 ```
-- **Health Check**: `GET http://127.0.0.1:8000/health`
-- **Prometheus Exporter**: `GET http://127.0.0.1:8000/metrics`
-- **Verify Endpoint**: `POST http://127.0.0.1:8000/predict` (Submit image, notes, and lab JSON)
+* **Health Check**: `GET http://127.0.0.1:8000/health`
+* **Inference Endpoint**: `POST http://127.0.0.1:8000/predict`
+* **Synthetic Generator**: `POST http://127.0.0.1:8000/synthetic/generate`
+* **Explainability Audit**: `POST http://127.0.0.1:8000/explainability/analyze`
+* **Performance Benchmark**: `POST http://127.0.0.1:8000/optimization/benchmark`
 
----
-
-## 📊 Evaluation & Verification Summary (OOD Test Set)
-
-* **Baseline F1-Score**: 76.92%
-* **Self-Healed F1-Score**: **92.31% (+15.39%)**
-* **Expected Calibration Error (Raw)**: 21.54%
-* **Expected Calibration Error (Calibrated)**: **6.12% (Absolute reduction: 15.4%)**
-* **Conformal Coverage (Target: 90.0%)**: **93.3%**
