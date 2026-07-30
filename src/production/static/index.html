@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTwin AI Portal: Multi-Modal Diagnostics & Research Lab</title>
+    <title>MedTwin AI: Enterprise Clinical Assistant Portal</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-base: #030409;
-            --sidebar-bg: rgba(10, 13, 28, 0.75);
-            --card-bg: rgba(13, 17, 38, 0.45);
+            --bg-base: #020306;
+            --sidebar-bg: rgba(8, 10, 24, 0.85);
+            --card-bg: rgba(11, 15, 33, 0.5);
             --card-border: rgba(255, 255, 255, 0.05);
             --text-main: #f8fafc;
             --text-mute: #64748b;
@@ -24,6 +24,7 @@
             --emerald-glow: rgba(16, 185, 129, 0.25);
             --amber: #f59e0b;
             --rose: #f43f5e;
+            --rose-glow: rgba(244, 63, 94, 0.25);
         }
 
         * {
@@ -35,8 +36,8 @@
         body {
             background-color: var(--bg-base);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 40%),
-                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 40%);
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.07) 0px, transparent 40%);
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
@@ -48,7 +49,7 @@
             font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* SIDEBAR LAYOUT */
+        /* SIDEBAR */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -59,9 +60,8 @@
             top: 0;
             display: flex;
             flex-direction: column;
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.25rem;
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             z-index: 100;
         }
 
@@ -69,12 +69,12 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 3rem;
+            margin-bottom: 2.5rem;
         }
 
         .logo-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             background: var(--primary);
             border-radius: 50%;
             box-shadow: 0 0 12px var(--primary-glow);
@@ -99,9 +99,8 @@
         }
 
         .logo-text {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
             background: linear-gradient(135deg, #c084fc 0%, #8b5cf6 50%, #06b6d4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -111,23 +110,19 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .nav-item {
-            width: 100%;
+            gap: 0.4rem;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.85rem 1.25rem;
+            gap: 0.85rem;
+            padding: 0.8rem 1.1rem;
             color: var(--text-mute);
             text-decoration: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.2s ease;
             background: transparent;
             border: none;
@@ -143,26 +138,25 @@
 
         .nav-link.active {
             color: white;
-            background: rgba(139, 92, 246, 0.15);
+            background: rgba(139, 92, 246, 0.12);
             border-left: 3px solid var(--primary);
-            box-shadow: inset 0 0 12px rgba(139, 92, 246, 0.05);
+            box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.05);
         }
 
-        /* MAIN CONTENT AREA */
+        /* MAIN CONTAINER */
         .main-container {
             margin-left: 280px;
             flex: 1;
-            padding: 2.5rem;
+            padding: 2.2rem;
             min-width: 0;
         }
 
-        /* Top Information Banner */
         .info-banner {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 1.25rem 2rem;
-            margin-bottom: 2.5rem;
+            padding: 1.1rem 2rem;
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -172,25 +166,25 @@
         .info-left {
             display: flex;
             align-items: center;
-            gap: 2.5rem;
+            gap: 2.2rem;
         }
 
         .stat-item {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.2rem;
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-mute);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             font-family: 'Space Grotesk', sans-serif;
             color: var(--text-main);
@@ -220,15 +214,15 @@
         }
 
         @keyframes panelFadeIn {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* GRID SYSTEMS */
+        /* CARDS AND GRIDS */
         .card-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2.5rem;
+            gap: 2rem;
         }
 
         @media (max-width: 1024px) {
@@ -237,15 +231,14 @@
             }
         }
 
-        /* Modern Glass Cards */
         .premium-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 18px;
+            padding: 1.75rem;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.45);
+            box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
@@ -258,12 +251,11 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.25), transparent);
         }
 
         .premium-card:hover {
-            border-color: rgba(139, 92, 246, 0.2);
-            box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.6);
+            border-color: rgba(139, 92, 246, 0.18);
         }
 
         .card-header-bar {
@@ -271,30 +263,30 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 1.25rem;
-            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .card-title-text {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: #d8b4fe;
             display: flex;
             align-items: center;
-            gap: 0.65rem;
+            gap: 0.6rem;
         }
 
-        /* Fields & Forms */
+        /* Forms inputs */
         .input-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .input-label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: var(--text-mute);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
@@ -303,35 +295,35 @@
             width: 100%;
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 0.85rem;
+            border-radius: 8px;
+            padding: 0.75rem;
             color: white;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.2s;
         }
 
         input[type="text"]:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
+            box-shadow: 0 0 8px var(--primary-glow);
             background: rgba(0, 0, 0, 0.7);
         }
 
         .vitals-grid-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.85rem;
-            margin-bottom: 0.85rem;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
-        /* Buttons and Controllers */
+        /* Buttons */
         .glowing-btn {
             background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
             color: white;
             border: none;
-            padding: 0.95rem 1.75rem;
-            border-radius: 10px;
+            padding: 0.85rem 1.5rem;
+            border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -339,62 +331,67 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.6rem;
-            font-size: 0.95rem;
+            gap: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .glowing-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 0 20px var(--primary-glow);
+            box-shadow: 0 0 16px var(--primary-glow);
         }
 
         .glowing-btn-emerald {
             background: linear-gradient(135deg, #10b981 0%, #047857 100%);
         }
         .glowing-btn-emerald:hover {
-            box-shadow: 0 0 20px var(--emerald-glow);
+            box-shadow: 0 0 16px var(--emerald-glow);
+        }
+
+        .glowing-btn-rose {
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+        }
+        .glowing-btn-rose:hover {
+            box-shadow: 0 0 16px var(--rose-glow);
         }
 
         .template-pills-row {
             display: flex;
-            gap: 0.6rem;
-            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .template-pill {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.07);
             color: var(--text-mute);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .template-pill:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-main);
-            border-color: rgba(255,255,255,0.15);
         }
 
-        /* Result Outputs blocks */
+        /* Results blocks */
         .glow-result-box {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
-            padding: 1.5rem;
-            margin-top: 1.25rem;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1rem;
             border-left: 4px solid var(--primary);
-            position: relative;
         }
 
         .result-item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
         }
 
         .result-item-row:last-child {
@@ -411,26 +408,26 @@
         }
 
         .terminal-box {
-            background: #020308;
+            background: #020307;
             border: 1px solid rgba(16, 185, 129, 0.12);
             color: #10b981;
             font-family: 'Fira Code', monospace;
             font-size: 0.8rem;
-            padding: 0.85rem;
+            padding: 0.8rem;
             border-radius: 8px;
-            max-height: 140px;
+            max-height: 120px;
             overflow-y: auto;
-            margin-top: 0.6rem;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+            margin-top: 0.5rem;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
         }
 
-        /* Circular progress gauges */
+        /* Visual gauges */
         .circular-gauges-row {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             background: rgba(255, 255, 255, 0.01);
-            padding: 1rem;
+            padding: 0.85rem;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.03);
         }
@@ -439,18 +436,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .gauge-svg {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             transform: rotate(-90deg);
         }
 
         .gauge-bg {
             fill: none;
-            stroke: rgba(255, 255, 255, 0.06);
+            stroke: rgba(255, 255, 255, 0.05);
             stroke-width: 6;
         }
 
@@ -458,111 +455,93 @@
             fill: none;
             stroke: var(--primary);
             stroke-width: 6;
-            stroke-dasharray: 220;
-            stroke-dashoffset: 220;
+            stroke-dasharray: 188;
+            stroke-dashoffset: 188;
             transition: stroke-dashoffset 0.6s ease;
             stroke-linecap: round;
         }
 
         .gauge-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-mute);
             font-weight: 700;
         }
 
-        /* Specialist Agent Voting tags */
+        /* Specialist boxes */
         .agents-voting-box {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.85rem;
-            margin-bottom: 1.5rem;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .agent-voting-pill {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.75rem;
-            border-radius: 10px;
+            padding: 0.65rem;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s;
-        }
-
-        .agent-voting-pill:hover {
-            border-color: rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.04);
         }
 
         .agent-label-name {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
         .agent-vote-tag-status {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            padding: 0.2rem 0.6rem;
-            border-radius: 5px;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
             text-transform: uppercase;
         }
 
         .vote-positive {
             background: rgba(244, 63, 94, 0.15);
             color: #f43f5e;
-            box-shadow: 0 0 10px rgba(244, 63, 94, 0.1);
         }
 
         .vote-negative {
             background: rgba(16, 185, 129, 0.15);
             color: #10b981;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
         }
 
-        /* Tables custom styling */
+        /* Tables */
         .opt-data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1.25rem;
-            font-size: 0.9rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
         }
 
         .opt-data-table th {
             text-align: left;
-            padding: 0.85rem;
+            padding: 0.75rem;
             border-bottom: 2px solid rgba(255, 255, 255, 0.08);
             color: var(--text-mute);
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         .opt-data-table td {
-            padding: 0.95rem 0.85rem;
+            padding: 0.85rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .opt-data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .opt-data-table tr:hover td {
-            background: rgba(255, 255, 255, 0.015);
-            color: white;
-        }
-
-        /* SVG Saliency map visual coordinates overlay */
+        /* Saliency Grid */
         .visual-crosshairs-grid {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: 220px;
+            height: 220px;
             background: radial-gradient(circle, rgba(15,23,42,0.8) 0%, rgba(2,3,8,0.95) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
+            border-radius: 10px;
             margin: 0 auto;
             overflow: hidden;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
 
         .visual-crosshairs-grid::after {
@@ -573,19 +552,19 @@
             background: 
                 linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-size: 15px 15px;
             left: 0;
             top: 0;
         }
 
         .saliency-target-point {
             position: absolute;
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--rose);
-            background: rgba(244, 63, 94, 0.25);
+            background: rgba(244, 63, 94, 0.2);
             border-radius: 50%;
-            box-shadow: 0 0 20px #f43f5e;
+            box-shadow: 0 0 16px #f43f5e;
             transform: translate(-50%, -50%);
             display: flex;
             justify-content: center;
@@ -594,60 +573,58 @@
 
         .saliency-target-point::after {
             content: '';
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
             background: white;
             border-radius: 50%;
         }
 
-        /* Attributions sliders */
+        /* SHAP progress bars */
         .progress-attr-row {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.85rem;
+            gap: 0.6rem;
+            margin-bottom: 0.75rem;
         }
 
         .progress-attr-label {
-            width: 130px;
-            font-size: 0.85rem;
+            width: 110px;
+            font-size: 0.8rem;
             color: var(--text-mute);
-            font-weight: 500;
         }
 
         .progress-attr-bar-track {
             flex: 1;
-            height: 10px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.04);
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .progress-attr-fill {
             height: 100%;
-            border-radius: 5px;
+            border-radius: 4px;
         }
 
         .progress-attr-val-num {
-            width: 60px;
-            font-size: 0.85rem;
+            width: 50px;
+            font-size: 0.8rem;
             font-weight: 700;
             text-align: right;
         }
 
-        /* Image Frame */
+        /* Image Display */
         .frame-placeholder-display {
             width: 100%;
-            height: 220px;
+            height: 180px;
             background: #020306;
             border: 2px dashed rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            position: relative;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
 
         .frame-placeholder-display img {
@@ -656,13 +633,225 @@
             object-fit: contain;
         }
 
-        .frame-placeholder-icon-desc {
+        /* DB & MCP connection pings */
+        .conn-indicator-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .conn-indicator-card:hover {
+            border-color: rgba(6, 182, 212, 0.15);
+            background: rgba(6, 182, 212, 0.01);
+        }
+
+        .conn-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .conn-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+        }
+
+        .conn-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .conn-subtitle {
+            font-size: 0.75rem;
             color: var(--text-mute);
-            font-size: 0.85rem;
+        }
+
+        .conn-ping-badge {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--cyan);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* LangGraph Timeline Tree nodes */
+        .workflow-timeline-tree {
             display: flex;
             flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 2px dashed rgba(255, 255, 255, 0.1);
+            margin-left: 0.5rem;
+        }
+
+        .timeline-node {
+            position: relative;
+        }
+
+        .timeline-node::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--text-mute);
+            border: 2px solid var(--bg-base);
+            border-radius: 50%;
+            left: -1.95rem;
+            top: 4px;
+            transition: all 0.3s;
+        }
+
+        .timeline-node.active::before {
+            background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+            border-color: white;
+            animation: pulse-node 1.5s infinite;
+        }
+
+        .timeline-node.completed::before {
+            background: var(--emerald);
+            box-shadow: 0 0 10px var(--emerald);
+        }
+
+        .timeline-node.paused::before {
+            background: var(--amber);
+            box-shadow: 0 0 10px var(--amber);
+        }
+
+        @keyframes pulse-node {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .node-agent-name {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #c7d2fe;
+        }
+
+        .node-latency {
+            font-size: 0.75rem;
+            color: var(--text-mute);
+            font-family: 'Fira Code', monospace;
+        }
+
+        .node-body {
+            font-size: 0.8rem;
+            color: var(--text-mute);
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+
+        /* Warning banner */
+        .review-warning-banner {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--amber);
+            color: #fef3c7;
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+            animation: bannerPulse 2s infinite;
+        }
+
+        @keyframes bannerPulse {
+            0% { border-color: rgba(245, 158, 11, 0.5); }
+            50% { border-color: rgba(245, 158, 11, 1); }
+            100% { border-color: rgba(245, 158, 11, 0.5); }
+        }
+
+        .warning-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        /* n8n checklist steps */
+        .automation-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .checklist-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checklist-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .check-icon {
+            color: var(--emerald);
+            font-weight: 800;
+        }
+
+        .alert-badge {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Analytics dials */
+        .analytics-grid-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-dial-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .metric-dial-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0.5rem 0;
         }
     </style>
 </head>
@@ -676,16 +865,22 @@
         </div>
         <ul class="nav-links">
             <li class="nav-item">
-                <button class="nav-link active" onclick="navigateDashboard('tab-predict')">🩺 Diagnostic Center</button>
+                <button class="nav-link active" onclick="switchDashboardTab('tab-predict')">🩺 Diagnostic Center</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" onclick="navigateDashboard('tab-ocr')">📄 OCR & Synthetic Scanners</button>
+                <button class="nav-link" onclick="switchDashboardTab('tab-mcp')">🔌 MCP Connections</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" onclick="navigateDashboard('tab-failure')">🔬 Failure Lab & Explainers</button>
+                <button class="nav-link" onclick="switchDashboardTab('tab-graph')">⛓️ Multi-Agent Graph</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" onclick="navigateDashboard('tab-optimization')">⚡ Performance Registry</button>
+                <button class="nav-link" onclick="switchDashboardTab('tab-n8n')">🤖 n8n Automations</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" onclick="switchDashboardTab('tab-failure')">🔬 Failure Lab & OCR</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" onclick="switchDashboardTab('tab-optimization')">⚡ Performance & Logs</button>
             </li>
         </ul>
     </div>
@@ -701,12 +896,12 @@
                     <span class="stat-value" style="color:var(--emerald);">ONLINE</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Inference Latency</span>
-                    <span class="stat-value" style="color:var(--cyan);">12.0 ms</span>
+                    <span class="stat-label">Redis Session Cache</span>
+                    <span class="stat-value" style="color:var(--cyan);">CONNECTED</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Calibrator Temp</span>
-                    <span class="stat-value">T = 1.15</span>
+                    <span class="stat-label">Attending Reviewer</span>
+                    <span class="stat-value">Dr. Sarah Carter</span>
                 </div>
             </div>
             <!-- Animated Heartbeat pulse SVG -->
@@ -787,19 +982,19 @@
                     <div class="circular-gauges-row">
                         <div class="gauge-wrap">
                             <svg class="gauge-svg">
-                                <circle class="gauge-bg" cx="35" cy="35" r="30" />
-                                <circle id="gauge-base" class="gauge-fill" cx="35" cy="35" r="30" style="stroke:var(--primary);" />
+                                <circle class="gauge-bg" cx="30" cy="30" r="25" />
+                                <circle id="gauge-base" class="gauge-fill" cx="30" cy="30" r="25" style="stroke:var(--primary);" />
                             </svg>
                             <span class="gauge-label">Base Prob</span>
-                            <span id="gauge-base-txt" style="font-size:0.95rem; font-weight:700;">0%</span>
+                            <span id="gauge-base-txt" style="font-size:0.9rem; font-weight:700;">0%</span>
                         </div>
                         <div class="gauge-wrap">
                             <svg class="gauge-svg">
-                                <circle class="gauge-bg" cx="35" cy="35" r="30" />
-                                <circle id="gauge-healed" class="gauge-fill" cx="35" cy="35" r="30" style="stroke:var(--emerald);" />
+                                <circle class="gauge-bg" cx="30" cy="30" r="25" />
+                                <circle id="gauge-healed" class="gauge-fill" cx="30" cy="30" r="25" style="stroke:var(--emerald);" />
                             </svg>
                             <span class="gauge-label">Healed Prob</span>
-                            <span id="gauge-healed-txt" style="font-size:0.95rem; font-weight:700;">0%</span>
+                            <span id="gauge-healed-txt" style="font-size:0.9rem; font-weight:700;">0%</span>
                         </div>
                     </div>
 
@@ -850,107 +1045,166 @@
             </div>
         </div>
 
-        <!-- TAB 2: OCR & SYNTHETIC DATA -->
-        <div id="tab-ocr" class="dashboard-panel">
+        <!-- TAB 2: MCP CONNECTIONS -->
+        <div id="tab-mcp" class="dashboard-panel">
             <div class="card-grid">
-                <!-- Left: OCR -->
+                <!-- Left: Connection Status -->
                 <div class="premium-card">
                     <div class="card-header-bar">
-                        <h2 class="card-header-title">📄 Medical Document OCR Scanner</h2>
+                        <h2 class="card-header-title">🔌 Active Model Context Protocol (MCP) Channels</h2>
                     </div>
-
-                    <form onsubmit="executeOCRScan(event)">
-                        <div class="input-group">
-                            <label class="input-label" for="ocr_doc_type">Document Category</label>
-                            <select id="ocr_doc_type">
-                                <option value="prescription">Prescription Slip</option>
-                                <option value="lab_report">Lab Panel Sheet</option>
-                                <option value="discharge_summary">Discharge Summary</option>
-                            </select>
+                    
+                    <div id="mcp-connections-list">
+                        <div class="conn-indicator-card">
+                            <div class="conn-left"><div class="conn-dot"></div><div><div class="conn-title">Electronic Health Records (EHR)</div><div class="conn-subtitle">FHIR Resources Patient, Condition</div></div></div>
+                            <span class="conn-ping-badge">1.1 ms</span>
                         </div>
-
-                        <div class="input-group">
-                            <label class="input-label" for="ocr_file">Scanned Document Image</label>
-                            <input type="file" id="ocr_file" accept="image/*">
+                        <div class="conn-indicator-card">
+                            <div class="conn-left"><div class="conn-dot"></div><div><div class="conn-title">Laboratory Observation Database</div><div class="conn-subtitle">Vitals metrics observers</div></div></div>
+                            <span class="conn-ping-badge">0.9 ms</span>
                         </div>
-
-                        <button type="submit" class="glowing-btn" style="width:100%;">Extract Text & Entities</button>
-                    </form>
-
-                    <div id="ocr-results" class="glow-result-box" style="display:none; border-left-color: var(--cyan);">
-                        <div class="result-item-row" style="flex-direction:column; align-items:flex-start;">
-                            <span class="result-key">Extracted Document Text:</span>
-                            <div id="lbl_ocr_raw" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:white;"></div>
+                        <div class="conn-indicator-card">
+                            <div class="conn-left"><div class="conn-dot"></div><div><div class="conn-title">Radiology PACS PACS Repository</div><div class="conn-subtitle">DICOM study and reports meta</div></div></div>
+                            <span class="conn-ping-badge">1.4 ms</span>
                         </div>
-                        <div class="result-item-row" style="margin-top:0.75rem;">
-                            <span class="result-key">Extracted Medications:</span>
-                            <span id="lbl_ocr_meds" class="result-val" style="color:var(--cyan);">--</span>
+                        <div class="conn-indicator-card">
+                            <div class="conn-left"><div class="conn-dot"></div><div><div class="conn-title">Pharmacy Medication Registry</div><div class="conn-subtitle">Drug interaction contraindications</div></div></div>
+                            <span class="conn-ping-badge">1.2 ms</span>
                         </div>
-                        <div class="result-item-row">
-                            <span class="result-key">Extracted Dosages:</span>
-                            <span id="lbl_ocr_doses" class="result-val">--</span>
+                        <div class="conn-indicator-card">
+                            <div class="conn-left"><div class="conn-dot"></div><div><div class="conn-title">AWS S3 / Google Drive Archives</div><div class="conn-subtitle">Archived discharge summaries PDF</div></div></div>
+                            <span class="conn-ping-badge">1.8 ms</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right: Synthetic Scanner -->
+                <!-- Right: Tool Tester -->
                 <div class="premium-card">
                     <div class="card-header-bar">
-                        <h2 class="card-header-title">🧪 Synthetic Medical Scan Generator</h2>
+                        <h2 class="card-header-title">🛠️ MCP JSON-RPC 2.0 Tool Simulator</h2>
                     </div>
 
-                    <form onsubmit="executeSyntheticGeneration(event)">
-                        <div class="vitals-grid-row">
-                            <div>
-                                <label class="input-label" for="gen_modal">Modality</label>
-                                <select id="gen_modal">
-                                    <option value="mri">Brain MRI</option>
-                                    <option value="x-ray">Chest X-Ray</option>
-                                    <option value="ct">CT Scan</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="input-label" for="gen_cond">Condition</label>
-                                <select id="gen_cond">
-                                    <option value="alkaptonuria">Alkaptonuria (Rare)</option>
-                                    <option value="glioblastoma">Glioblastoma (Rare)</option>
-                                    <option value="pneumonia">Pneumonia</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="input-label" for="gen_qual">Scan Quality</label>
-                                <select id="gen_qual">
-                                    <option value="high">Clean High-Quality</option>
-                                    <option value="blurred">Blurred (Motion)</option>
-                                    <option value="noisy">Noisy (Sensor)</option>
-                                </select>
-                            </div>
+                    <form onsubmit="runMcpToolQuery(event)">
+                        <div class="input-group">
+                            <label class="input-label" for="sel_mcp_tool">Select Tool</label>
+                            <select id="sel_mcp_tool">
+                                <option value="get_ehr_record">get_ehr_record</option>
+                                <option value="get_laboratory_results">get_laboratory_results</option>
+                                <option value="get_radiology_pacs">get_radiology_pacs</option>
+                                <option value="get_pharmacy_records">get_pharmacy_records</option>
+                                <option value="get_cloud_archives">get_cloud_archives</option>
+                                <option value="get_hospital_management">get_hospital_management</option>
+                            </select>
                         </div>
-
-                        <button type="submit" class="glowing-btn glowing-btn-emerald" style="width:100%;">Synthesize Patient Assets</button>
+                        <div class="input-group">
+                            <label class="input-label" for="txt_mcp_args">Arguments (JSON)</label>
+                            <input type="text" id="txt_mcp_args" value='{"patient_id": "PT-8891"}'>
+                        </div>
+                        <button type="submit" class="glowing-btn glowing-btn-emerald" style="width:100%;">Call MCP Server Tool</button>
                     </form>
 
-                    <div id="synthetic-results" class="glow-result-box" style="display:none; border-left-color: var(--emerald);">
-                        <div class="frame-placeholder-display">
-                            <img id="img_gen_preview" src="" alt="Synthetic Scan Asset">
+                    <div id="mcp-query-results" class="glow-result-box" style="display:none; border-left-color: var(--cyan);">
+                        <label class="input-label">JSON-RPC Response Payload:</label>
+                        <div id="lbl_mcp_json_resp" class="terminal-box" style="max-height:220px; color:#a5b4fc;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: LANGGRAPH MULTI-AGENT WORKFLOW -->
+        <div id="tab-graph" class="dashboard-panel">
+            <div class="card-grid" style="grid-template-columns: 1.2fr 1.8fr;">
+                <!-- Left: Controls -->
+                <div class="premium-card">
+                    <div class="card-header-bar">
+                        <h2 class="card-header-title">⛓️ Agent Pipeline Controls</h2>
+                    </div>
+
+                    <form onsubmit="runWorkflowSimulation(event)">
+                        <div class="input-group">
+                            <label class="input-label" for="wf_patient_id">Patient ID</label>
+                            <input type="text" id="wf_patient_id" value="PT-8891">
                         </div>
-                        <div class="result-item-row" style="flex-direction:column; align-items:flex-start;">
-                            <span class="result-key">Generated Urinalysis / Lab values:</span>
-                            <div id="lbl_gen_labs" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--text-main); font-family:monospace;"></div>
+                        <div class="input-group">
+                            <label class="input-label" for="wf_query">Clinical Inquiry Query</label>
+                            <textarea id="wf_query" rows="4">Review Jane Doe's charts. Patient presents with SpO2 91% and fever. Evaluate clinical risks, verify contraindications, and suggest an empiric therapy plan.</textarea>
                         </div>
-                        <div class="result-item-row" style="flex-direction:column; align-items:flex-start; margin-top:0.5rem;">
-                            <span class="result-key">Generated Patient History:</span>
-                            <div id="lbl_gen_history" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:var(--text-mute);"></div>
+                        <button type="submit" class="glowing-btn" style="width:100%;">Start LangGraph Workflow</button>
+                    </form>
+
+                    <div id="workflow-meta-results" class="glow-result-box" style="display:none; border-left-color: var(--primary); margin-top:1.5rem;">
+                        <div class="result-item-row">
+                            <span class="result-key">Workflow Status</span>
+                            <span id="lbl_wf_status" class="result-val">--</span>
+                        </div>
+                        <div class="result-item-row">
+                            <span class="result-key">Consensus Diagnosis</span>
+                            <span id="lbl_wf_diag" class="result-val" style="color:var(--primary);">--</span>
+                        </div>
+                        <div class="result-item-row">
+                            <span class="result-key">Mortality Risk Score</span>
+                            <span id="lbl_wf_risk" class="result-val" style="color:var(--rose);">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Timeline node tree -->
+                <div class="premium-card">
+                    <div class="card-header-bar">
+                        <h2 class="card-header-title">🌲 Multi-Agent Graph Timeline Tree</h2>
+                    </div>
+
+                    <!-- Blinking Warning banner -->
+                    <div id="wf-approval-banner" class="review-warning-banner" style="display:none;">
+                        <div class="warning-title">⚠️ Awaiting Clinical Human-in-the-loop Approval</div>
+                        <p style="font-size:0.8rem; line-height:1.4;">The clinical reviewer agent paused the pipeline. Mortality risk is critical due to severe hypoxia findings. Please review the care recommendations before approval.</p>
+                        <button class="glowing-btn glowing-btn-emerald" onclick="authorizeTreatmentPlan()" style="padding:0.5rem 1rem; font-size:0.8rem;">Approve & Trigger Automations</button>
+                    </div>
+
+                    <div class="workflow-timeline-tree" id="wf-timeline-box">
+                        <div style="color:var(--text-mute); text-align:center; padding: 3rem 0;">
+                            Start the workflow execution to view agent logs.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 3: FAILURE LAB & EXPLAINERS -->
+        <!-- TAB 4: N8N WEBHOOK AUTOMATIONS -->
+        <div id="tab-n8n" class="dashboard-panel">
+            <div class="card-grid">
+                <!-- Left: Post-diagnosis automations checklist -->
+                <div class="premium-card">
+                    <div class="card-header-bar">
+                        <h2 class="card-header-title">🤖 n8n Automated Workflows</h2>
+                    </div>
+                    
+                    <div class="automation-checklist" id="n8n-checklist-box">
+                        <div style="color:var(--text-mute); text-align:center; padding:3rem 0;">
+                            Approve the patient diagnostic workflow to execute automations.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: High-risk escalations and alerts -->
+                <div class="premium-card" style="border-color: rgba(244,63,94,0.15);">
+                    <div class="card-header-bar">
+                        <h2 class="card-header-title" style="color:#fca5a5;">🚨 Emergency Escalations & alerts</h2>
+                    </div>
+
+                    <div class="automation-checklist" id="n8n-escalations-box">
+                        <div style="color:var(--text-mute); text-align:center; padding:3rem 0;">
+                            No active high-risk critical alerts found.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: FAILURE LAB & OCR (EXISTING STUFF) -->
         <div id="tab-failure" class="dashboard-panel">
             <div class="card-grid">
-                <!-- Left: Failure auditor -->
+                <!-- Left Card: Failure auditor -->
                 <div class="premium-card">
                     <div class="card-header-bar">
                         <h2 class="card-header-title">🔬 Failure Analysis Laboratory</h2>
@@ -1002,7 +1256,7 @@
                     </div>
                 </div>
 
-                <!-- Right: Explainers -->
+                <!-- Right Card: Explainers -->
                 <div class="premium-card">
                     <div class="card-header-bar">
                         <h2 class="card-header-title">👁️ Clinical Prediction Explainers</h2>
@@ -1032,17 +1286,59 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Double Grid: Document OCR reader -->
+            <div class="premium-card" style="margin-top: 2rem;">
+                <div class="card-header-bar">
+                    <h2 class="card-header-title">📄 Medical Document OCR Scanner</h2>
+                </div>
+                
+                <div class="card-grid">
+                    <form onsubmit="executeOCRScan(event)">
+                        <div class="input-group">
+                            <label class="input-label" for="ocr_doc_type">Document Category</label>
+                            <select id="ocr_doc_type">
+                                <option value="prescription">Prescription Slip</option>
+                                <option value="lab_report">Lab Panel Sheet</option>
+                                <option value="discharge_summary">Discharge Summary</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label" for="ocr_file">Scanned Document Image</label>
+                            <input type="file" id="ocr_file" accept="image/*">
+                        </div>
+
+                        <button type="submit" class="glowing-btn" style="width:100%;">Extract Text & Entities</button>
+                    </form>
+
+                    <div id="ocr-results" class="glow-result-box" style="display:none; border-left-color: var(--cyan); margin-top:0;">
+                        <div class="result-item-row" style="flex-direction:column; align-items:flex-start;">
+                            <span class="result-key">Extracted Document Text:</span>
+                            <div id="lbl_ocr_raw" style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; width:100%; margin-top:0.4rem; color:white;"></div>
+                        </div>
+                        <div class="result-item-row" style="margin-top:0.75rem;">
+                            <span class="result-key">Extracted Medications:</span>
+                            <span id="lbl_ocr_meds" class="result-val" style="color:var(--cyan);">--</span>
+                        </div>
+                        <div class="result-item-row">
+                            <span class="result-key">Extracted Dosages:</span>
+                            <span id="lbl_ocr_doses" class="result-val">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- TAB 4: PERFORMANCE REGISTRY -->
+        <!-- TAB 6: PERFORMANCE REGISTRY & LOGS -->
         <div id="tab-optimization" class="dashboard-panel">
-            <div class="premium-card" style="margin-bottom: 2.5rem">
+            <div class="premium-card" style="margin-bottom: 2rem">
                 <div class="card-header-bar">
                     <h2 class="card-header-title">⚡ Distributed Training & Inference Optimization</h2>
                     <button class="glowing-btn glowing-btn-emerald" onclick="executeBenchmarkProfile()">Trigger Performance Benchmark Suite</button>
                 </div>
 
-                <div class="card-grid" style="grid-template-columns: 2fr 1.5fr; gap:2.5rem;">
+                <div class="card-grid" style="grid-template-columns: 2fr 1.5fr; gap:2rem;">
                     <!-- Table metrics -->
                     <div>
                         <h3 style="font-size:1.1rem; color:#c7d2fe;">Runtime Compiler Execution Metrics</h3>
@@ -1067,7 +1363,7 @@
                     <!-- FSDP configuration codebox -->
                     <div>
                         <h3 style="font-size:1.1rem; color:#c7d2fe; margin-bottom:1rem;">FSDP & DeepSpeed ZeRO-3 parameters</h3>
-                        <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:10px; font-family:'Fira Code', monospace; font-size:0.75rem; border:1px solid rgba(255,255,255,0.06); color:#a5b4fc; height:220px; overflow-y:auto; box-shadow:inset 0 2px 8px rgba(0,0,0,0.8);">
+                        <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:10px; font-family:'Fira Code', monospace; font-size:0.75rem; border:1px solid rgba(255,255,255,0.06); color:#a5b4fc; height:200px; overflow-y:auto; box-shadow:inset 0 2px 8px rgba(0,0,0,0.8);">
 {
   "zero_optimization": {
     "stage": 3,
@@ -1154,12 +1450,16 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-        function navigateDashboard(tabId) {
+        function switchDashboardTab(tabId) {
             document.querySelectorAll(".dashboard-panel").forEach(p => p.classList.remove("active"));
             document.querySelectorAll(".nav-link").forEach(t => t.classList.remove("active"));
             
             document.getElementById(tabId).classList.add("active");
             event.target.classList.add("active");
+            
+            if (tabId === 'tab-mcp') {
+                updateMcpTelemetry();
+            }
         }
 
         function applyCaseTemplate(type) {
@@ -1212,13 +1512,11 @@
             formData.append("file", pixelBlob, "scan.png");
 
             try {
-                // Predict predict
                 const r1 = await fetch("/predict", { method: "POST", body: formData });
                 const res = await r1.json();
                 document.getElementById("predict-results").style.display = "block";
                 document.getElementById("lbl_diagnosis").innerText = res.diagnostic_metrics.diagnosis_label;
                 
-                // Set dials
                 setCircularProgress("gauge-base", res.diagnostic_metrics.base_calibrated_prob);
                 document.getElementById("gauge-base-txt").innerText = (res.diagnostic_metrics.base_calibrated_prob * 100).toFixed(1) + "%";
                 setCircularProgress("gauge-healed", res.diagnostic_metrics.healed_calibrated_prob);
@@ -1227,7 +1525,6 @@
                 document.getElementById("lbl_audit").innerText = res.diagnostic_metrics.requires_clinical_audit ? "YES (Calibrate Sets)" : "NO";
                 document.getElementById("lbl_heal_log").innerText = res.self_healing_trace.reasoning_log;
 
-                // consensus
                 const r2 = await fetch("/consensus", { method: "POST", body: formData });
                 const cRes = await r2.json();
                 document.getElementById("consensus-results").style.display = "block";
@@ -1256,6 +1553,142 @@
             }
         }
 
+        async function updateMcpTelemetry() {
+            try {
+                const response = await fetch("/mcp/status");
+                const res = await response.json();
+                // Logs tools schema
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function runMcpToolQuery(event) {
+            event.preventDefault();
+            const tool = document.getElementById("sel_mcp_tool").value;
+            const args = document.getElementById("txt_mcp_args").value;
+
+            const formData = new FormData();
+            formData.append("tool_name", tool);
+            formData.append("arguments_json", args);
+
+            try {
+                const response = await fetch("/mcp/query", { method: "POST", body: formData });
+                const res = await response.json();
+                document.getElementById("mcp-query-results").style.display = "block";
+                document.getElementById("lbl_mcp_json_resp").innerText = JSON.stringify(response.ok ? res : {"error": res.detail}, null, 2);
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function runWorkflowSimulation(event) {
+            event.preventDefault();
+            const patientId = document.getElementById("wf_patient_id").value;
+            const query = document.getElementById("wf_query").value;
+
+            const formData = new FormData();
+            formData.append("patient_id", patientId);
+            formData.append("query", query);
+
+            try {
+                const response = await fetch("/workflow/start", { method: "POST", body: formData });
+                const state = await response.json();
+
+                document.getElementById("workflow-meta-results").style.display = "block";
+                document.getElementById("lbl_wf_status").innerText = state.review_status.toUpperCase();
+                document.getElementById("lbl_wf_diag").innerText = state.diagnosis || "Unformulated";
+                document.getElementById("lbl_wf_risk").innerText = state.risk_assessment.mortality_risk ? (state.risk_assessment.mortality_risk * 100).toFixed(0) + "%" : "0%";
+
+                // Update timeline tree
+                const box = document.getElementById("wf-timeline-box");
+                box.innerHTML = "";
+                
+                state.timeline.forEach((log) => {
+                    const statusClass = log.status === "paused" ? "paused" : "completed";
+                    box.innerHTML += `
+                        <div class="timeline-node ${statusClass}">
+                            <div class="node-header">
+                                <span class="node-agent-name">${log.agent}</span>
+                                <span class="node-latency">${log.elapsed_ms.toFixed(1)} ms</span>
+                            </div>
+                            <div class="node-body">${log.message}</div>
+                        </div>
+                    `;
+                });
+
+                if (state.review_status === "pending_human_approval") {
+                    document.getElementById("wf-approval-banner").style.display = "block";
+                } else {
+                    document.getElementById("wf-approval-banner").style.display = "none";
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function authorizeTreatmentPlan() {
+            const patientId = document.getElementById("wf_patient_id").value;
+            const formData = new FormData();
+            formData.append("patient_id", patientId);
+
+            try {
+                const response = await fetch("/workflow/approve", { method: "POST", body: formData });
+                const data = await response.json();
+                const state = data.workflow_state;
+
+                document.getElementById("wf-approval-banner").style.display = "none";
+                document.getElementById("lbl_wf_status").innerText = state.review_status.toUpperCase();
+
+                // Update timeline tree
+                const box = document.getElementById("wf-timeline-box");
+                box.innerHTML = "";
+                state.timeline.forEach((log) => {
+                    box.innerHTML += `
+                        <div class="timeline-node completed">
+                            <div class="node-header">
+                                <span class="node-agent-name">${log.agent}</span>
+                                <span class="node-latency">${log.elapsed_ms.toFixed(1)} ms</span>
+                            </div>
+                            <div class="node-body">${log.message}</div>
+                        </div>
+                    `;
+                });
+
+                // Update n8n checklist
+                const n8nBox = document.getElementById("n8n-checklist-box");
+                n8nBox.innerHTML = "";
+                data.n8n_automation.steps_executed.forEach((step) => {
+                    n8nBox.innerHTML += `
+                        <div class="checklist-item">
+                            <span class="checklist-label"><span class="check-icon">✓</span> ${step.step}</span>
+                            <span class="agent-vote-tag-status vote-negative" style="font-size:0.65rem;">success</span>
+                        </div>
+                    `;
+                });
+
+                // Update escalations
+                const escBox = document.getElementById("n8n-escalations-box");
+                escBox.innerHTML = "";
+                if (data.n8n_automation.escalations.length > 0) {
+                    data.n8n_automation.escalations.forEach((esc) => {
+                        escBox.innerHTML += `
+                            <div class="checklist-item" style="border-color: rgba(244,63,94,0.15);">
+                                <span class="checklist-label" style="color:#fca5a5;">⚠ ${esc.step}</span>
+                                <span class="alert-badge">${esc.priority}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    escBox.innerHTML = `<div style="color:var(--text-mute); text-align:center; padding:3rem 0;">No active high-risk critical alerts found.</div>`;
+                }
+
+                switchDashboardTab('tab-n8n');
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
         async function executeOCRScan(event) {
             event.preventDefault();
             const dtype = document.getElementById("ocr_doc_type").value;
@@ -1278,30 +1711,6 @@
                 document.getElementById("lbl_ocr_raw").innerText = `"${res.ocr_text}"`;
                 document.getElementById("lbl_ocr_meds").innerText = res.extracted_medications.join(", ") || "None";
                 document.getElementById("lbl_ocr_doses").innerText = res.extracted_dosages.join(", ") || "None";
-            } catch(e) {
-                console.error(e);
-            }
-        }
-
-        async function executeSyntheticGeneration(event) {
-            event.preventDefault();
-            const modal = document.getElementById("gen_modal").value;
-            const cond = document.getElementById("gen_cond").value;
-            const qual = document.getElementById("gen_qual").value;
-
-            const formData = new FormData();
-            formData.append("modality", modal);
-            formData.append("condition", cond);
-            formData.append("quality", qual);
-
-            try {
-                const response = await fetch("/synthetic/generate", { method: "POST", body: formData });
-                const res = await response.json();
-                
-                document.getElementById("synthetic-results").style.display = "block";
-                document.getElementById("img_gen_preview").src = "data:image/png;base64," + res.synthetic_image_b64;
-                document.getElementById("lbl_gen_labs").innerText = res.synthetic_lab_report;
-                document.getElementById("lbl_gen_history").innerText = res.synthetic_patient_history;
             } catch(e) {
                 console.error(e);
             }
@@ -1336,7 +1745,6 @@
                 document.getElementById("explain-results").style.display = "block";
                 document.getElementById("lbl_exp_narrative").innerText = res.natural_language_explanation;
                 
-                // Renders attributions progress tracks
                 const box = document.getElementById("shap-bars-box");
                 box.innerHTML = "";
                 Object.entries(res.shap_values).forEach(([key, val]) => {
@@ -1381,7 +1789,7 @@
                 console.error(e);
             }
         }
-        
+
         applyCaseTemplate('pneumonia');
     </script>
 </body>

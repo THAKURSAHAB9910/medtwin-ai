@@ -18,6 +18,7 @@
 6. **Synthetic Scanner Engine**: Synthesizes blurred, noisy, and rare disease profiles (Alkaptonuria, Glioblastoma, Huntington's) to stress-test diagnostic robustness.
 7. **Failure Lab & Saliency Explainers**: Automatically audits false negatives and provides Grad-CAM, SHAP, and attention map attribution traces.
 8. **Experiment Tracking & TensorRT Optimization**: Plugs into MLflow/W&B/TensorBoard and compiles inference targets to TensorRT to reduce GPU footprint to 2.8GB.
+9. **Enterprise Assistant Extensions (Phase 15/16)**: Implements Model Context Protocol (MCP) clients, sequential LangGraph states execution, and n8n webhook notifications.
 
 ---
 
@@ -26,17 +27,23 @@
 ```
 nhyp/
 ├── docs/
-│   ├── technical_report.md         # Detailed technical specification
-│   ├── ablation_report.md          # Quantitative ablation comparisons
 │   ├── dataset_card.md             # Dataset partitions details
 │   ├── model_card.md               # Model parameters details
 │   ├── deployment_guide.md         # FastAPI server launch details
 │   ├── training_guide.md           # PEFT and DeepSpeed training instructions
 │   └── evaluation_guide.md         # Accuracy validation metrics
 ├── src/
+│   ├── mcp/
+│   │   ├── server.py              # MCP Server (JSON-RPC tools)
+│   │   └── client.py              # MCP Client (Context connector)
 │   ├── agents/
 │   │   ├── coordinator.py          # Specialist agent coordination
-│   │   └── specialists.py          # Specialist panel agents
+│   │   ├── specialists.py          # Specialist panel agents
+│   │   └── langgraph_workflow.py   # Multi-agent state graph pipeline
+│   ├── automation/
+│   │   └── n8n_integration.py      # n8n webhook notifications & escalations
+│   ├── database/
+│   │   └── schemas.py              # Extended FHIR/HL7 schemas & Redis cache
 │   ├── ocr/
 │   │   ├── pipeline.py             # OCR doc scanner pipeline
 │   │   └── benchmarker.py          # PaddleOCR, EasyOCR benchmarks
@@ -54,10 +61,7 @@ nhyp/
 │       ├── inference.py            # torch.compile, TensorRT compilers
 │       └── benchmarker.py          # Latency & throughput benchmarker
 ├── tests/                          # Automated pytest suite
-├── run_synthetic_pipeline.py       # [CLI] Synthetic pipeline entrypoint
-├── run_explainability_pipeline.py  # [CLI] Explainability pipeline entrypoint
-├── run_tracking_pipeline.py        # [CLI] MLflow tracking pipeline entrypoint
-├── run_optimization_pipeline.py    # [CLI] TensorRT compile benchmarks entrypoint
+│   └── test_enterprise.py          # [NEW] Enterprise features unit tests
 └── README.md                       # High-level overview (this file)
 ```
 
@@ -102,7 +106,10 @@ python -m uvicorn src.production.app:app --host 127.0.0.1 --port 8000
 ```
 * **Health Check**: `GET http://127.0.0.1:8000/health`
 * **Inference Endpoint**: `POST http://127.0.0.1:8000/predict`
-* **Synthetic Generator**: `POST http://127.0.0.1:8000/synthetic/generate`
-* **Explainability Audit**: `POST http://127.0.0.1:8000/explainability/analyze`
-* **Performance Benchmark**: `POST http://127.0.0.1:8000/optimization/benchmark`
+* **MCP Connection Status**: `GET http://127.0.0.1:8000/mcp/status`
+* **MCP Tool Query**: `POST http://127.0.0.1:8000/mcp/query` (Pass tool_name, arguments_json)
+* **Start LangGraph Workflow**: `POST http://127.0.0.1:8000/workflow/start` (Pass patient_id, query)
+* **Authorize Human Review**: `POST http://127.0.0.1:8000/workflow/approve` (Pass patient_id)
+* **Workflow Analytics**: `GET http://127.0.0.1:8000/workflow/analytics`
+* **n8n Webhook Listener**: `POST http://127.0.0.1:8000/n8n/webhook`
 

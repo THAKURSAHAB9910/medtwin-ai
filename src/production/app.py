@@ -36,6 +36,12 @@ from src.optimization.distributed import DistributedTrainingOrchestrator
 from src.optimization.inference import InferenceOptimizer
 from src.optimization.benchmarker import OptimizationBenchmarker
 
+from src.mcp.server import MCPServer
+from src.mcp.client import MCPClient
+from src.agents.langgraph_workflow import ClinicalWorkflowGraph, AgentState
+from src.automation.n8n_integration import N8NAutomationEngine
+from src.database.schemas import RedisCacheSimulation
+
 app = FastAPI(
     title="MedTwin AI: Production Multimodal Healthcare Foundation API",
     description="Research-Grade Multimodal Diagnostic Decision Support System",
@@ -72,6 +78,13 @@ experiment_tracker: Optional[ClinicalExperimentTracker] = None
 dist_orchestrator: Optional[DistributedTrainingOrchestrator] = None
 inf_optimizer: Optional[InferenceOptimizer] = None
 opt_benchmarker: Optional[OptimizationBenchmarker] = None
+
+# MCP and Workflow Upgrades Globals
+mcp_server: Optional[MCPServer] = None
+mcp_client: Optional[MCPClient] = None
+workflow_graph: Optional[ClinicalWorkflowGraph] = None
+n8n_engine: Optional[N8NAutomationEngine] = None
+redis_cache: Optional[RedisCacheSimulation] = None
 img_transform = T.Compose([
     T.Resize((384, 384)),
     T.ToTensor(),
@@ -89,6 +102,7 @@ def load_model():
     global failure_lab, clinical_explainer
     global experiment_tracker
     global dist_orchestrator, inf_optimizer, opt_benchmarker
+    global mcp_server, mcp_client, workflow_graph, n8n_engine, redis_cache
     print("Initializing MedTwin AI foundation models...")
     model = MedTwinAIModule(use_mock_vlm=True)
     model.eval()
@@ -143,6 +157,13 @@ def load_model():
     dist_orchestrator = DistributedTrainingOrchestrator()
     inf_optimizer = InferenceOptimizer()
     opt_benchmarker = OptimizationBenchmarker()
+    
+    # Initialize MCP, LangGraph Workflow, n8n Engine, and Cache
+    mcp_server = MCPServer()
+    mcp_client = MCPClient(mcp_server)
+    workflow_graph = ClinicalWorkflowGraph(mcp_client)
+    n8n_engine = N8NAutomationEngine()
+    redis_cache = RedisCacheSimulation()
     
     nlp_vector_db.add_documents([
         ("American Thoracic Society (ATS) Pneumonia Guideline: Primary recommendation is Ceftriaxone 1g IV daily plus Azithromycin 500mg PO daily.", {"source": "ATS Pneumonia 2019"}),
@@ -854,6 +875,125 @@ def run_optimization_benchmarking():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Benchmarking execution error: {str(e)}")
+
+# ==========================================
+# ENTERPRISE ASSISTANT ROUTES (Phase 15/16)
+# ==========================================
+
+@app.get("/mcp/status")
+def get_mcp_status():
+    """Retrieve MCP Server connection state, active tool definitions, and telemetry logs."""
+    if mcp_server is None or mcp_client is None:
+        raise HTTPException(status_code=503, detail="MCP Module Offline")
+    return {
+        "status": "connected",
+        "tools": mcp_server.list_tools(),
+        "ping_ms": 1.2,
+        "total_calls": len(mcp_client.call_history)
+    }
+
+@app.post("/mcp/query")
+def query_mcp_tool(tool_name: str = Form(...), arguments_json: str = Form(...)):
+    """Triggers an individual JSON-RPC 2.0 query to the MCP Server database."""
+    if mcp_client is None:
+        raise HTTPException(status_code=503, detail="MCP Client Offline")
+    try:
+        args = json.loads(arguments_json)
+        response = mcp_client.execute_tool(tool_name, args)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/workflow/start")
+def start_workflow(patient_id: str = Form(...), query: str = Form(...)):
+    """Initiates a multi-agent LangGraph workflow execution with caching."""
+    if workflow_graph is None or redis_cache is None:
+        raise HTTPException(status_code=503, detail="Workflow orchestrator offline")
+    try:
+        state = AgentState(patient_id=patient_id, query=query)
+        final_state = workflow_graph.execute_workflow(state)
+        
+        # Cache current workflow state
+        redis_cache.set(f"session:{patient_id}", final_state.model_dump_json(), ex=3600)
+        return final_state.model_dump()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/workflow/approve")
+def approve_workflow(patient_id: str = Form(...)):
+    """Approve a paused clinical review workflow session, trigger n8n post-diagnosis."""
+    if workflow_graph is None or redis_cache is None or n8n_engine is None:
+        raise HTTPException(status_code=503, detail="Workflow engines offline")
+    
+    cached_str = redis_cache.get(f"session:{patient_id}")
+    if not cached_str:
+        raise HTTPException(status_code=404, detail="No active clinical workflow session found.")
+        
+    try:
+        state_dict = json.loads(cached_str)
+        state = AgentState(**state_dict)
+        
+        # Override review status
+        state.human_approved = True
+        state.review_status = "approved"
+        
+        # Resume remaining graph nodes execution
+        final_state = workflow_graph.execute_workflow(state)
+        
+        # Cache completed state
+        redis_cache.set(f"session:{patient_id}", final_state.model_dump_json(), ex=3600)
+        
+        # Trigger post-diagnosis n8n automation webhook pipeline
+        is_high_risk = final_state.risk_assessment.get("high_risk", False)
+        n8n_report = n8n_engine.trigger_post_diagnosis_workflow(final_state.final_report, is_high_risk=is_high_risk)
+        
+        return {
+            "workflow_state": final_state.model_dump(),
+            "n8n_automation": n8n_report
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/workflow/analytics")
+def get_workflow_analytics():
+    """Retrieve runtime telemetry, success rates, automation counts, and active caches."""
+    if mcp_client is None or n8n_engine is None or redis_cache is None:
+        raise HTTPException(status_code=503, detail="Analytics database offline")
+        
+    mcp_history = mcp_client.call_history
+    n8n_history = n8n_engine.execution_history
+    
+    total_mcp_calls = len(mcp_history)
+    avg_mcp_latency = sum(c["latency_ms"] for c in mcp_history) / max(total_mcp_calls, 1)
+    
+    total_automations = len(n8n_history)
+    high_risk_alerts = sum(1 for r in n8n_history if r["is_high_risk"])
+    
+    return {
+        "mcp_telemetry": {
+            "total_calls": total_mcp_calls,
+            "average_latency_ms": avg_mcp_latency,
+            "logs": mcp_history[-10:]
+        },
+        "n8n_telemetry": {
+            "total_workflow_runs": total_automations,
+            "high_risk_emergency_alerts": high_risk_alerts,
+            "runs": n8n_history[-10:]
+        },
+        "cache_stats": {
+            "redis_ping": redis_cache.ping(),
+            "cached_sessions_count": len(redis_cache.store)
+        }
+    }
+
+@app.post("/n8n/webhook")
+def receive_n8n_webhook(payload: Dict[str, Any]):
+    """n8n Webhook mock receiver to simulate enterprise automation hooks."""
+    return {
+        "status": "success",
+        "message": "n8n Webhook received successfully.",
+        "processed_payload": payload
+    }
 
 if __name__ == "__main__":
     import uvicorn
